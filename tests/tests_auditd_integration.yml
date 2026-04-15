@@ -1,0 +1,148 @@
+# SPDX-License-Identifier: MIT
+---
+# Integration test: configure auditd and rules, verify files, then restore.
+- name: Integration test for linux-system-roles.auditd
+  hosts: all
+  tasks:
+    - name: Exercise role and validate configuration
+      block:
+        - name: Back up existing auditd configuration and rules
+          ansible.builtin.include_tasks: tasks/setup.yml
+
+        - name: Run auditd role with non-default settings
+          ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+          vars:
+            auditd_log_format: RAW
+            auditd_flush: INCREMENTAL_ASYNC
+            auditd_freq: 55
+            auditd_max_log_file: 9
+            auditd_num_logs: 6
+            auditd_priority_boost: 5
+            auditd_name_format: USER
+            auditd_name: "test-node"
+            auditd_max_log_file_action: IGNORE
+            auditd_space_left: "80"
+            auditd_space_left_action: SYSLOG
+            auditd_verify_email: true
+            auditd_action_mail_acct: root
+            auditd_admin_space_left: "55"
+            auditd_admin_space_left_action: SYSLOG
+            auditd_disk_full_action: SYSLOG
+            auditd_disk_error_action: SYSLOG
+            auditd_report_interval: "1"
+            auditd_tcp_listen_port: 1024
+            auditd_tcp_listen_queue: 6
+            auditd_tcp_max_per_addr: 2
+            auditd_tcp_client_ports: 1024-65535
+            auditd_tcp_client_max_idle: 1
+            auditd_transport: TCP
+            auditd_krb5_principal: auditd
+            auditd_krb5_key_file: /etc/audit/audit.key
+            auditd_distribute_network: true
+            auditd_q_depth: 2001
+            auditd_overflow_action: SINGLE
+            auditd_max_restarts: 11
+            auditd_plugin_dir: /etc/audit/plugins.d
+            auditd_end_of_event_timeout: 2
+            auditd_buffer_size: 32769
+            auditd_fail_mode: 1
+            auditd_maximum_rate: 61
+            auditd_enable_flag: 1
+            auditd_default_arch: b64
+            auditd_rules:
+              - file: /etc/hosts
+                permissions:
+                  - read
+                  - write
+                keyname: lsr_auditd_integration
+              - file: /etc/group
+                permissions:
+                  - read
+                filters:
+                  - auid>=1000
+                  - success=1
+                keyname: lsr_auditd_group_filtered
+              - action: always
+                filter: exit
+                syscall: adjtimex
+                keyname: lsr_auditd_syscall_adjtimex
+
+        - name: Flush handlers after role
+          ansible.builtin.meta: flush_handlers
+
+        - name: Read generated auditd.conf
+          ansible.builtin.slurp:
+            path: /etc/audit/auditd.conf
+          register: __auditd_integration_conf
+
+        - name: Verify auditd.conf reflects role parameters
+          ansible.builtin.assert:
+            that:
+              - "'local_events = yes' in __c"
+              - "'write_logs = yes' in __c"
+              - "'log_file = /var/log/audit/audit.log' in __c"
+              - "'log_format = RAW' in __c"
+              - "'log_group = root' in __c"
+              - "'flush = INCREMENTAL_ASYNC' in __c"
+              - "'freq = 55' in __c"
+              - "'max_log_file = 9' in __c"
+              - "'num_logs = 6' in __c"
+              - "'priority_boost = 5' in __c"
+              - "'name_format = USER' in __c"
+              - "'max_log_file_action = IGNORE' in __c"
+              - "'space_left = 80' in __c"
+              - "'space_left_action = SYSLOG' in __c"
+              - "'verify_email = yes' in __c"
+              - "'action_mail_acct = root' in __c"
+              - "'admin_space_left = 55' in __c"
+              - "'admin_space_left_action = SYSLOG' in __c"
+              - "'disk_full_action = SYSLOG' in __c"
+              - "'disk_error_action = SYSLOG' in __c"
+              - "'report_interval = 1' in __c"
+              - "'tcp_listen_port = 1024' in __c"
+              - "'tcp_listen_queue = 6' in __c"
+              - "'tcp_max_per_addr = 2' in __c"
+              - "'tcp_client_ports = 1024-65535' in __c"
+              - "'tcp_client_max_idle = 1' in __c"
+              - "'transport = TCP' in __c"
+              - "'enable_krb5 = no' in __c"
+              - "'krb5_principal = auditd' in __c"
+              - "'krb5_key_file = /etc/audit/audit.key' in __c"
+              - "'distribute_network = yes' in __c"
+              - "'q_depth = 2001' in __c"
+              - "'overflow_action = SINGLE' in __c"
+              - "'max_restarts = 11' in __c"
+              - "'plugin_dir = /etc/audit/plugins.d/' in __c"
+              - "'end_of_event_timeout = 2' in __c"
+          vars:
+            __c: "{{ __auditd_integration_conf.content | b64decode }}"
+
+        - name: Read generated custom.rules
+          ansible.builtin.slurp:
+            path: /etc/audit/rules.d/custom.rules
+          register: __auditd_integration_rules
+
+        - name: Verify custom.rules contains auditd_rules (file, file+filters, syscall)
+          ansible.builtin.assert:
+            that:
+              - "'-b 32769' in __r"
+              - "'-f 1' in __r"
+              - "'-r 61' in __r"
+              - "'-e 1' in __r"
+              - "'-w /etc/hosts' in __r"
+              - "'-p rw' in __r"
+              - "'-k lsr_auditd_integration' in __r"
+              - >-
+                '-w /etc/group -F auid>=1000 -F success=1 -p r -k lsr_auditd_group_filtered'
+                in (__r | replace('\n', ' '))
+              - "'-a always,exit' in __r"
+              - "'-F arch=b64' in __r"
+              - "'-S adjtimex' in __r"
+              - "'-k lsr_auditd_syscall_adjtimex' in __r"
+          vars:
+            __r: "{{ __auditd_integration_rules.content | b64decode }}"
+
+      always:
+        - name: Restore system state after integration test
+          ansible.builtin.include_tasks: tasks/cleanup.yml
+          tags: tests::cleanup

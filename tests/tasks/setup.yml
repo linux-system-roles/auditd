@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: MIT
+---
+# Back up auditd configuration and rules before integration tests.
+# Sets facts for cleanup.yml: __auditd_integration_backup_auditd_conf,
+# __auditd_integration_backup_custom_rules, __auditd_integration_had_custom_rules.
+
+- name: Check for existing auditd.conf
+  ansible.builtin.stat:
+    path: /etc/audit/auditd.conf
+  register: __auditd_integration_stat_conf
+
+- name: Check for existing custom.rules
+  ansible.builtin.stat:
+    path: /etc/audit/rules.d/custom.rules
+  register: __auditd_integration_stat_rules
+
+- name: Remember whether custom.rules existed
+  ansible.builtin.set_fact:
+    __auditd_integration_had_custom_rules: "{{ __auditd_integration_stat_rules.stat.exists }}"
+
+- name: Back up auditd.conf before test
+  ansible.builtin.copy:
+    src: /etc/audit/auditd.conf
+    dest: /root/.lsr_auditd_integration_auditd.conf.bak
+    remote_src: true
+    mode: preserve
+  when: __auditd_integration_stat_conf.stat.exists
+
+- name: Back up custom.rules before test
+  ansible.builtin.copy:
+    src: /etc/audit/rules.d/custom.rules
+    dest: /root/.lsr_auditd_integration_custom.rules.bak
+    remote_src: true
+    mode: preserve
+  when: __auditd_integration_stat_rules.stat.exists
+
+- name: Record auditd.conf backup path for cleanup
+  ansible.builtin.set_fact:
+    __auditd_integration_backup_auditd_conf: /root/.lsr_auditd_integration_auditd.conf.bak
+  when: __auditd_integration_stat_conf.stat.exists
+
+- name: Record custom.rules backup path for cleanup
+  ansible.builtin.set_fact:
+    __auditd_integration_backup_custom_rules: /root/.lsr_auditd_integration_custom.rules.bak
+  when: __auditd_integration_stat_rules.stat.exists

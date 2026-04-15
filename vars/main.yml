@@ -1,0 +1,41 @@
+# SPDX-License-Identifier: MIT
+---
+# Internal variables (see defaults/main.yml for public role API).
+
+__auditd_packages_map:
+  default:
+    - audit
+  Debian:
+    - auditd
+
+__auditd_config_directory: /etc/audit
+__auditd_config_file: auditd.conf
+__auditd_service: auditd
+
+__auditd_permissions:
+  read: r
+  write: w
+  execute: x
+  attribute_change: a
+
+__auditd_required_facts:
+  - distribution
+  - distribution_major_version
+  - distribution_version
+  - os_family
+
+__auditd_required_facts_subsets: "{{ ['!all', '!min'] + __auditd_required_facts }}"
+
+# BEGIN - DO NOT EDIT THIS BLOCK - rh distros variables
+__auditd_rh_distros:
+  - AlmaLinux
+  - CentOS
+  - RedHat
+  - Rocky
+
+__auditd_rh_distros_fedora: "{{ __auditd_rh_distros + ['Fedora'] }}"
+
+__auditd_is_rh_distro: "{{ ansible_facts['distribution'] in __auditd_rh_distros }}"
+
+__auditd_is_rh_distro_fedora: "{{ ansible_facts['distribution'] in __auditd_rh_distros_fedora }}"
+# END - DO NOT EDIT THIS BLOCK - rh distros variables
