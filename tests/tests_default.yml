@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Ensure that the role runs with default parameters
+  hosts: all
+  tasks:
+    - name: Back up existing auditd configuration and rules
+      ansible.builtin.include_tasks: tasks/setup.yml
+
+    - name: Run test
+      block:
+        - name: Run role with cleared facts
+          include_tasks: tasks/run_role_with_clear_facts.yml
+          vars:
+            __sr_public: true
+
+        - name: Flush handlers after role
+          ansible.builtin.meta: flush_handlers
+
+        - name: Check header for ansible_managed, fingerprint
+          include_tasks: tasks/check_header.yml
+          vars:
+            __file: "{{ __auditd_config_directory }}/{{ __auditd_config_file }}"
+            __fingerprint: system_role:auditd
+
+      always:
+        - name: Restore system state after test
+          ansible.builtin.include_tasks: tasks/cleanup.yml
+          tags: tests::cleanup
