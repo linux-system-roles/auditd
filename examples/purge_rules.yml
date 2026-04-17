@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: MIT
+---
+# Remove all rules.d fragments, then keep only custom.rules when it already
+# matches auditd_rules (idempotent second run: changed: false).
+- name: Purge rules.d then manage custom.rules
+  hosts: all
+  vars:
+    auditd_purge_rules: true
+    auditd_rules:
+      - file: /etc/shadow
+        permissions:
+          - read
+        keyname: shadow_watch
+  roles:
+    - linux-system-roles.auditd
