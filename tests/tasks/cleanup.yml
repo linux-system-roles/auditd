@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Restore auditd.conf from integration test backup
+  ansible.builtin.copy:
+    src: "{{ __auditd_integration_backup_auditd_conf }}"
+    dest: /etc/audit/auditd.conf
+    remote_src: true
+    mode: preserve
+  when: __auditd_integration_backup_auditd_conf is defined
+
+- name: Remove auditd.conf backup file
+  ansible.builtin.file:
+    path: "{{ __auditd_integration_backup_auditd_conf }}"
+    state: absent
+  when: __auditd_integration_backup_auditd_conf is defined
+
+- name: Restore custom.rules from integration test backup
+  ansible.builtin.copy:
+    src: "{{ __auditd_integration_backup_custom_rules }}"
+    dest: /etc/audit/rules.d/custom.rules
+    remote_src: true
+    mode: preserve
+  when: __auditd_integration_backup_custom_rules is defined
+
+- name: Remove custom.rules backup file
+  ansible.builtin.file:
+    path: "{{ __auditd_integration_backup_custom_rules }}"
+    state: absent
+  when: __auditd_integration_backup_custom_rules is defined
+
+- name: Remove custom.rules if it did not exist before test
+  ansible.builtin.file:
+    path: /etc/audit/rules.d/custom.rules
+    state: absent
+  when: not __auditd_integration_had_custom_rules | bool
