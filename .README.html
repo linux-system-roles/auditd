@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<!--
+==============================================================================
+           "GitHub HTML5 Pandoc Template" v2.2 — by Tristano Ajmone
+==============================================================================
+Copyright © Tristano Ajmone, 2017-2020, MIT License (MIT). Project's home:
+
+- https://github.com/tajmone/pandoc-goodies
+
+The CSS in this template reuses source code taken from the following projects:
+
+- GitHub Markdown CSS: Copyright © Sindre Sorhus, MIT License (MIT):
+  https://github.com/sindresorhus/github-markdown-css
+
+- Primer CSS: Copyright © 2016-2017 GitHub Inc., MIT License (MIT):
+  http://primercss.io/
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The MIT License
+
+Copyright (c) Tristano Ajmone, 2017-2020 (github.com/tajmone/pandoc-goodies)
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
+Copyright (c) 2017 GitHub Inc.
+
+"GitHub Pandoc HTML5 Template" is Copyright (c) Tristano Ajmone, 2017-2020,
+released under the MIT License (MIT); it contains readaptations of substantial
+portions of the following third party softwares:
+
+(1) "GitHub Markdown CSS", Copyright (c) Sindre Sorhus, MIT License (MIT).
+(2) "Primer CSS", Copyright (c) 2016 GitHub Inc., MIT License (MIT).
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+==============================================================================-->
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>linux-system-roles.auditd</title>
+  <style type="text/css">
+@charset "UTF-8";.markdown-body{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;color:#24292e;font-family:-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";font-size:16px;line-height:1.5;word-wrap:break-word;box-sizing:border-box;min-width:200px;margin:0 auto;padding:45px}.markdown-body a{color:#0366d6;background-color:transparent;text-decoration:none;-webkit-text-decoration-skip:objects}.markdown-body a:active,.markdown-body a:hover{outline-width:0}.markdown-body a:hover{text-decoration:underline}.markdown-body a:not([href]){color:inherit;text-decoration:none}.markdown-body strong{font-weight:600}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{margin-top:24px;margin-bottom:16px;font-weight:600;line-height:1.25}.markdown-body h1{font-size:2em;margin:.67em 0;padding-bottom:.3em;border-bottom:1px solid #eaecef}.markdown-body h2{padding-bottom:.3em;font-size:1.5em;border-bottom:1px solid #eaecef}.markdown-body h3{font-size:1.25em}.markdown-body h4{font-size:1em}.markdown-body h5{font-size:.875em}.markdown-body h6{font-size:.85em;color:#6a737d}.markdown-body img{border-style:none}.markdown-body svg:not(:root){overflow:hidden}.markdown-body hr{box-sizing:content-box;height:.25em;margin:24px 0;padding:0;overflow:hidden;background-color:#e1e4e8;border:0}.markdown-body hr::before{display:table;content:""}.markdown-body hr::after{display:table;clear:both;content:""}.markdown-body input{margin:0;overflow:visible;font:inherit;font-family:inherit;font-size:inherit;line-height:inherit}.markdown-body [type=checkbox]{box-sizing:border-box;padding:0}.markdown-body *{box-sizing:border-box}.markdown-body blockquote{margin:0}.markdown-body ol,.markdown-body ul{padding-left:2em}.markdown-body ol ol,.markdown-body ul ol{list-style-type:lower-roman}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:0;margin-bottom:0}.markdown-body ol ol ol,.markdown-body ol ul ol,.markdown-body ul ol ol,.markdown-body ul ul ol{list-style-type:lower-alpha}.markdown-body li>p{margin-top:16px}.markdown-body li+li{margin-top:.25em}.markdown-body dd{margin-left:0}.markdown-body dl{padding:0}.markdown-body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:600}.markdown-body dl dd{padding:0 16px;margin-bottom:16px}.markdown-body code{font-family:SFMono-Regular,Consolas,"Liberation Mono",Menlo,Courier,monospace}.markdown-body pre{font:12px SFMono-Regular,Consolas,"Liberation Mono",Menlo,Courier,monospace;word-wrap:normal}.markdown-body blockquote,.markdown-body dl,.markdown-body ol,.markdown-body p,.markdown-body pre,.markdown-body table,.markdown-body ul{margin-top:0;margin-bottom:16px}.markdown-body blockquote{padding:0 1em;color:#6a737d;border-left:.25em solid #dfe2e5}.markdown-body blockquote>:first-child{margin-top:0}.markdown-body blockquote>:last-child{margin-bottom:0}.markdown-body table{display:block;width:100%;overflow:auto;border-spacing:0;border-collapse:collapse}.markdown-body table th{font-weight:600}.markdown-body table td,.markdown-body table th{padding:6px 13px;border:1px solid #dfe2e5}.markdown-body table tr{background-color:#fff;border-top:1px solid #c6cbd1}.markdown-body table tr:nth-child(2n){background-color:#f6f8fa}.markdown-body img{max-width:100%;box-sizing:content-box;background-color:#fff}.markdown-body code{padding:.2em 0;margin:0;font-size:85%;background-color:rgba(27,31,35,.05);border-radius:3px}.markdown-body code::after,.markdown-body code::before{letter-spacing:-.2em;content:" "}.markdown-body pre>code{padding:0;margin:0;font-size:100%;word-break:normal;white-space:pre;background:0 0;border:0}.markdown-body .highlight{margin-bottom:16px}.markdown-body .highlight pre{margin-bottom:0;word-break:normal}.markdown-body .highlight pre,.markdown-body pre{padding:16px;overflow:auto;font-size:85%;line-height:1.45;background-color:#f6f8fa;border-radius:3px}.markdown-body pre code{display:inline;max-width:auto;padding:0;margin:0;overflow:visible;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}.markdown-body pre code::after,.markdown-body pre code::before{content:normal}.markdown-body .full-commit .btn-outline:not(:disabled):hover{color:#005cc5;border-color:#005cc5}.markdown-body kbd{box-shadow:inset 0 -1px 0 #959da5;display:inline-block;padding:3px 5px;font:11px/10px SFMono-Regular,Consolas,"Liberation Mono",Menlo,Courier,monospace;color:#444d56;vertical-align:middle;background-color:#fcfcfc;border:1px solid #c6cbd1;border-bottom-color:#959da5;border-radius:3px;box-shadow:inset 0 -1px 0 #959da5}.markdown-body :checked+.radio-label{position:relative;z-index:1;border-color:#0366d6}.markdown-body .task-list-item{list-style-type:none}.markdown-body .task-list-item+.task-list-item{margin-top:3px}.markdown-body .task-list-item input{margin:0 .2em .25em -1.6em;vertical-align:middle}.markdown-body::before{display:table;content:""}.markdown-body::after{display:table;clear:both;content:""}.markdown-body>:first-child{margin-top:0!important}.markdown-body>:last-child{margin-bottom:0!important}.Alert,.Error,.Note,.Success,.Warning{padding:11px;margin-bottom:24px;border-style:solid;border-width:1px;border-radius:4px}.Alert p,.Error p,.Note p,.Success p,.Warning p{margin-top:0}.Alert p:last-child,.Error p:last-child,.Note p:last-child,.Success p:last-child,.Warning p:last-child{margin-bottom:0}.Alert{color:#246;background-color:#e2eef9;border-color:#bac6d3}.Warning{color:#4c4a42;background-color:#fff9ea;border-color:#dfd8c2}.Error{color:#911;background-color:#fcdede;border-color:#d2b2b2}.Success{color:#22662c;background-color:#e2f9e5;border-color:#bad3be}.Note{color:#2f363d;background-color:#f6f8fa;border-color:#d5d8da}.Alert h1,.Alert h2,.Alert h3,.Alert h4,.Alert h5,.Alert h6{color:#246;margin-bottom:0}.Warning h1,.Warning h2,.Warning h3,.Warning h4,.Warning h5,.Warning h6{color:#4c4a42;margin-bottom:0}.Error h1,.Error h2,.Error h3,.Error h4,.Error h5,.Error h6{color:#911;margin-bottom:0}.Success h1,.Success h2,.Success h3,.Success h4,.Success h5,.Success h6{color:#22662c;margin-bottom:0}.Note h1,.Note h2,.Note h3,.Note h4,.Note h5,.Note h6{color:#2f363d;margin-bottom:0}.Alert h1:first-child,.Alert h2:first-child,.Alert h3:first-child,.Alert h4:first-child,.Alert h5:first-child,.Alert h6:first-child,.Error h1:first-child,.Error h2:first-child,.Error h3:first-child,.Error h4:first-child,.Error h5:first-child,.Error h6:first-child,.Note h1:first-child,.Note h2:first-child,.Note h3:first-child,.Note h4:first-child,.Note h5:first-child,.Note h6:first-child,.Success h1:first-child,.Success h2:first-child,.Success h3:first-child,.Success h4:first-child,.Success h5:first-child,.Success h6:first-child,.Warning h1:first-child,.Warning h2:first-child,.Warning h3:first-child,.Warning h4:first-child,.Warning h5:first-child,.Warning h6:first-child{margin-top:0}h1.title,p.subtitle{text-align:center}h1.title.followed-by-subtitle{margin-bottom:0}p.subtitle{font-size:1.5em;font-weight:600;line-height:1.25;margin-top:0;margin-bottom:16px;padding-bottom:.3em}div.line-block{white-space:pre-line}
+  </style>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<article class="markdown-body">
+<header>
+<h1 class="title">linux-system-roles.auditd</h1>
+</header>
+<hr>
+<nav id="TOC">
+<h1 class="toc-title">Contents</h1>
+<ul>
+<li><a href="#requirements" id="toc-requirements">Requirements</a>
+<ul>
+<li><a href="#collection-requirements"
+id="toc-collection-requirements">Collection requirements</a></li>
+</ul></li>
+<li><a href="#role-variables" id="toc-role-variables">Role variables</a>
+<ul>
+<li><a href="#auditd_local_events"
+id="toc-auditd_local_events">auditd_local_events</a></li>
+<li><a href="#auditd_write_logs"
+id="toc-auditd_write_logs">auditd_write_logs</a></li>
+<li><a href="#auditd_log_file"
+id="toc-auditd_log_file">auditd_log_file</a></li>
+<li><a href="#auditd_log_format"
+id="toc-auditd_log_format">auditd_log_format</a></li>
+<li><a href="#auditd_log_group"
+id="toc-auditd_log_group">auditd_log_group</a></li>
+<li><a href="#auditd_flush" id="toc-auditd_flush">auditd_flush</a></li>
+<li><a href="#auditd_freq" id="toc-auditd_freq">auditd_freq</a></li>
+<li><a href="#auditd_num_logs"
+id="toc-auditd_num_logs">auditd_num_logs</a></li>
+<li><a href="#auditd_name_format"
+id="toc-auditd_name_format">auditd_name_format</a></li>
+<li><a href="#auditd_name" id="toc-auditd_name">auditd_name</a></li>
+<li><a href="#auditd_max_log_file"
+id="toc-auditd_max_log_file">auditd_max_log_file</a></li>
+<li><a href="#auditd_max_log_file_action"
+id="toc-auditd_max_log_file_action">auditd_max_log_file_action</a></li>
+<li><a href="#auditd_max_log_file_action_exe"
+id="toc-auditd_max_log_file_action_exe">auditd_max_log_file_action_exe</a></li>
+<li><a href="#auditd_space_left"
+id="toc-auditd_space_left">auditd_space_left</a></li>
+<li><a href="#auditd_space_left_action"
+id="toc-auditd_space_left_action">auditd_space_left_action</a></li>
+<li><a href="#auditd_space_left_action_exe"
+id="toc-auditd_space_left_action_exe">auditd_space_left_action_exe</a></li>
+<li><a href="#auditd_action_mail_acct"
+id="toc-auditd_action_mail_acct">auditd_action_mail_acct</a></li>
+<li><a href="#auditd_verify_email"
+id="toc-auditd_verify_email">auditd_verify_email</a></li>
+<li><a href="#auditd_admin_space_left"
+id="toc-auditd_admin_space_left">auditd_admin_space_left</a></li>
+<li><a href="#auditd_admin_space_left_action"
+id="toc-auditd_admin_space_left_action">auditd_admin_space_left_action</a></li>
+<li><a href="#auditd_admin_space_left_action_exe"
+id="toc-auditd_admin_space_left_action_exe">auditd_admin_space_left_action_exe</a></li>
+<li><a href="#auditd_disk_full_action"
+id="toc-auditd_disk_full_action">auditd_disk_full_action</a></li>
+<li><a href="#auditd_disk_full_action_exe"
+id="toc-auditd_disk_full_action_exe">auditd_disk_full_action_exe</a></li>
+<li><a href="#auditd_disk_error_action"
+id="toc-auditd_disk_error_action">auditd_disk_error_action</a></li>
+<li><a href="#auditd_disk_error_action_exe"
+id="toc-auditd_disk_error_action_exe">auditd_disk_error_action_exe</a></li>
+<li><a href="#auditd_priority_boost"
+id="toc-auditd_priority_boost">auditd_priority_boost</a></li>
+<li><a href="#auditd_tcp_listen_port"
+id="toc-auditd_tcp_listen_port">auditd_tcp_listen_port</a></li>
+<li><a href="#auditd_tcp_listen_queue"
+id="toc-auditd_tcp_listen_queue">auditd_tcp_listen_queue</a></li>
+<li><a href="#auditd_tcp_max_per_addr"
+id="toc-auditd_tcp_max_per_addr">auditd_tcp_max_per_addr</a></li>
+<li><a href="#auditd_use_libwrap"
+id="toc-auditd_use_libwrap">auditd_use_libwrap</a></li>
+<li><a href="#auditd_tcp_client_ports"
+id="toc-auditd_tcp_client_ports">auditd_tcp_client_ports</a></li>
+<li><a href="#auditd_tcp_client_max_idle"
+id="toc-auditd_tcp_client_max_idle">auditd_tcp_client_max_idle</a></li>
+<li><a href="#auditd_transport"
+id="toc-auditd_transport">auditd_transport</a></li>
+<li><a href="#auditd_enable_krb5"
+id="toc-auditd_enable_krb5">auditd_enable_krb5</a></li>
+<li><a href="#auditd_krb5_principal"
+id="toc-auditd_krb5_principal">auditd_krb5_principal</a></li>
+<li><a href="#auditd_krb5_key_file"
+id="toc-auditd_krb5_key_file">auditd_krb5_key_file</a></li>
+<li><a href="#auditd_distribute_network"
+id="toc-auditd_distribute_network">auditd_distribute_network</a></li>
+<li><a href="#auditd_q_depth"
+id="toc-auditd_q_depth">auditd_q_depth</a></li>
+<li><a href="#auditd_overflow_action"
+id="toc-auditd_overflow_action">auditd_overflow_action</a></li>
+<li><a href="#auditd_max_restarts"
+id="toc-auditd_max_restarts">auditd_max_restarts</a></li>
+<li><a href="#auditd_plugin_dir"
+id="toc-auditd_plugin_dir">auditd_plugin_dir</a></li>
+<li><a href="#auditd_end_of_event_timeout"
+id="toc-auditd_end_of_event_timeout">auditd_end_of_event_timeout</a></li>
+<li><a href="#auditd_report_interval"
+id="toc-auditd_report_interval">auditd_report_interval</a></li>
+<li><a href="#auditd_buffer_size"
+id="toc-auditd_buffer_size">auditd_buffer_size</a></li>
+<li><a href="#auditd_fail_mode"
+id="toc-auditd_fail_mode">auditd_fail_mode</a></li>
+<li><a href="#auditd_maximum_rate"
+id="toc-auditd_maximum_rate">auditd_maximum_rate</a></li>
+<li><a href="#auditd_backlog_wait_time"
+id="toc-auditd_backlog_wait_time">auditd_backlog_wait_time</a></li>
+<li><a href="#auditd_enable_flag"
+id="toc-auditd_enable_flag">auditd_enable_flag</a></li>
+<li><a href="#auditd_loginuid_immutable"
+id="toc-auditd_loginuid_immutable">auditd_loginuid_immutable</a></li>
+<li><a href="#auditd_manage_rules"
+id="toc-auditd_manage_rules">auditd_manage_rules</a></li>
+<li><a href="#auditd_purge_rules"
+id="toc-auditd_purge_rules">auditd_purge_rules</a></li>
+<li><a href="#auditd_reboot_ok"
+id="toc-auditd_reboot_ok">auditd_reboot_ok</a></li>
+<li><a href="#auditd_start_service"
+id="toc-auditd_start_service">auditd_start_service</a></li>
+<li><a href="#auditd_rules" id="toc-auditd_rules">auditd_rules</a>
+<ul>
+<li><a href="#required-keys" id="toc-required-keys">Required
+keys</a></li>
+<li><a href="#optional-keys" id="toc-optional-keys">Optional
+keys</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#variables-exported-by-the-role"
+id="toc-variables-exported-by-the-role">Variables Exported by the
+Role</a>
+<ul>
+<li><a href="#auditd_auditctl_settings_previous"
+id="toc-auditd_auditctl_settings_previous">auditd_auditctl_settings_previous</a></li>
+<li><a href="#auditd_reboot_required"
+id="toc-auditd_reboot_required">auditd_reboot_required</a></li>
+</ul></li>
+<li><a href="#example-playbook" id="toc-example-playbook">Example
+playbook</a></li>
+<li><a href="#rpm-ostree" id="toc-rpm-ostree">rpm-ostree</a></li>
+<li><a href="#license" id="toc-license">License</a></li>
+<li><a href="#author-information" id="toc-author-information">Author
+Information</a></li>
+</ul>
+</nav>
+<hr>
+<p><img
+src="https://github.com/linux-system-roles/auditd/workflows/tox/badge.svg"
+alt="auditd" /></p>
+<p>This role installs the audit subsystem packages, renders
+<code>/etc/audit/auditd.conf</code> from variables (defaults follow
+<code>clear_config()</code> in <a
+href="https://github.com/linux-audit/audit-userspace/blob/master/src/auditd-config.c">audit-userspace
+<code>auditd-config.c</code></a>), and optionally manages
+<code>rules.d/custom.rules</code>. Option semantics and allowed values
+are described in <a
+href="https://github.com/linux-audit/audit-userspace/blob/master/docs/auditd.conf.5">auditd.conf(5)</a>.</p>
+<p>This role is heavily based on <a
+href="https://github.com/robertdebock/ansible-role-auditd">ansible-role-auditd</a></p>
+<p>This role contains a substantial amount of code generated by Claude
+opus-4.6</p>
+<h1 id="requirements">Requirements</h1>
+<p>See below.</p>
+<h2 id="collection-requirements">Collection requirements</h2>
+<p>To manage <code>rpm-ostree</code> systems, install collections on the
+control node:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ansible-galaxy</span> collection install <span class="at">-vv</span> <span class="at">-r</span> meta/collection-requirements.yml</span></code></pre></div>
+<h1 id="role-variables">Role variables</h1>
+<p>Unless noted, keywords are case-insensitive in
+<code>auditd.conf</code> (this role writes the values you set) but all
+UPPERCASE is preferred and is used below. Boolean role variables for
+yes/no daemon options are rendered as the strings <code>yes</code> or
+<code>no</code> in the config file. Validation is enforced by
+<code>meta/argument_specs.yml</code> and
+<code>tasks/assert_role_vars.yml</code> using the same limits as the
+audit-userspace parsers (for example <code>num_logs</code> &lt;=
+999).</p>
+<h2 id="auditd_local_events">auditd_local_events</h2>
+<p>Default: <code>true</code></p>
+<p>Type: bool</p>
+<p>Whether local audit events are processed.</p>
+<h2 id="auditd_write_logs">auditd_write_logs</h2>
+<p>Default: <code>true</code></p>
+<p>Type: bool</p>
+<p>Whether auditd writes logs.</p>
+<h2 id="auditd_log_file">auditd_log_file</h2>
+<p>Default: <code>/var/log/audit/audit.log</code></p>
+<p>Type: str (path)</p>
+<p>Path to the audit log file.</p>
+<h2 id="auditd_log_format">auditd_log_format</h2>
+<p>Default: <code>ENRICHED</code></p>
+<p>Type: str</p>
+<p>Log format. Allowed: <code>RAW</code>, <code>NOLOG</code>,
+<code>ENRICHED</code>.</p>
+<h2 id="auditd_log_group">auditd_log_group</h2>
+<p>Default: <code>root</code></p>
+<p>Type: str</p>
+<p>Group of the audit log file (name or numeric GID).</p>
+<h2 id="auditd_flush">auditd_flush</h2>
+<p>Default: <code>INCREMENTAL_ASYNC</code></p>
+<p>Type: str</p>
+<p>Flush technique. Allowed: <code>NONE</code>,
+<code>INCREMENTAL</code>, <code>INCREMENTAL_ASYNC</code>,
+<code>DATA</code>, <code>SYNC</code>.</p>
+<h2 id="auditd_freq">auditd_freq</h2>
+<p>Default: <code>50</code></p>
+<p>Type: int</p>
+<p>Flush frequency in records (digits only; must be &lt;=
+<code>INT_MAX</code>). If <code>auditd_flush</code> is
+<code>INCREMENTAL</code> or <code>INCREMENTAL_ASYNC</code>, this must be
+greater than zero.</p>
+<h2 id="auditd_num_logs">auditd_num_logs</h2>
+<p>Default: <code>5</code></p>
+<p>Type: int</p>
+<p>Number of log files to keep when rotating; digits only,
+<code>0–999</code>.</p>
+<h2 id="auditd_name_format">auditd_name_format</h2>
+<p>Default: <code>NONE</code></p>
+<p>Type: str</p>
+<p>How the node name is determined. Allowed: <code>NONE</code>,
+<code>HOSTNAME</code>, <code>FQD</code>, <code>NUMERIC</code>,
+<code>USER</code>.</p>
+<h2 id="auditd_name">auditd_name</h2>
+<p>Default: <code>""</code></p>
+<p>Type: str</p>
+<p>Node name; required when <code>auditd_name_format</code> is
+<code>USER</code>. When empty, the line is omitted from the config.</p>
+<h2 id="auditd_max_log_file">auditd_max_log_file</h2>
+<p>Default: <code>8</code></p>
+<p>Type: int</p>
+<p>Maximum log file size in megabytes (digits only).</p>
+<h2 id="auditd_max_log_file_action">auditd_max_log_file_action</h2>
+<p>Default: <code>ROTATE</code></p>
+<p>Type: str</p>
+<p>Action when the size limit is reached. Allowed: <code>IGNORE</code>,
+<code>SYSLOG</code>, <code>EXEC</code>, <code>SUSPEND</code>,
+<code>ROTATE</code>, <code>KEEP_LOGS</code>. For <code>EXEC</code>, set
+<code>auditd_max_log_file_action_exe</code> to an absolute executable
+path.</p>
+<h2
+id="auditd_max_log_file_action_exe">auditd_max_log_file_action_exe</h2>
+<p>Default: <code>""</code></p>
+<p>Type: str</p>
+<p>Absolute path to the executable used when
+<code>auditd_max_log_file_action</code> is <code>EXEC</code>.</p>
+<h2 id="auditd_space_left">auditd_space_left</h2>
+<p>Default: <code>"75"</code></p>
+<p>Type: str</p>
+<p>Free space threshold: megabytes as a number, or a percentage such as
+<code>25%</code> (must be &lt; 100%). Value must be greater than
+<code>auditd_admin_space_left</code>.</p>
+<h2 id="auditd_space_left_action">auditd_space_left_action</h2>
+<p>Default: <code>SYSLOG</code></p>
+<p>Type: str</p>
+<p>Action when free space drops below <code>auditd_space_left</code>.
+Allowed: <code>IGNORE</code>, <code>SYSLOG</code>, <code>ROTATE</code>,
+<code>EMAIL</code>, <code>EXEC</code>, <code>SUSPEND</code>,
+<code>SINGLE</code>. (<code>HALT</code> is not accepted by auditd for
+this key.) For <code>EXEC</code>, set
+<code>auditd_space_left_action_exe</code>.</p>
+<h2 id="auditd_space_left_action_exe">auditd_space_left_action_exe</h2>
+<p>Default: <code>""</code></p>
+<p>Type: str</p>
+<p>Absolute path for <code>EXEC</code> with
+<code>auditd_space_left_action</code>.</p>
+<h2 id="auditd_action_mail_acct">auditd_action_mail_acct</h2>
+<p>Default: <code>root</code></p>
+<p>Type: str</p>
+<p>Account for mail actions.</p>
+<h2 id="auditd_verify_email">auditd_verify_email</h2>
+<p>Default: <code>true</code></p>
+<p>Type: bool</p>
+<p>Whether to validate mail account format when possible.</p>
+<h2 id="auditd_admin_space_left">auditd_admin_space_left</h2>
+<p>Default: <code>"50"</code></p>
+<p>Type: str</p>
+<p>Admin free-space threshold (MiB or <code>N%</code> as for
+<code>auditd_space_left</code>). Value must be less than
+<code>auditd_space_left</code>.</p>
+<h2
+id="auditd_admin_space_left_action">auditd_admin_space_left_action</h2>
+<p>Default: <code>SUSPEND</code></p>
+<p>Type: str</p>
+<p>Action when admin threshold is crossed. Same keyword set as other
+failure actions; for <code>EXEC</code> set
+<code>auditd_admin_space_left_action_exe</code>.</p>
+<h2
+id="auditd_admin_space_left_action_exe">auditd_admin_space_left_action_exe</h2>
+<p>Default: <code>""</code></p>
+<p>Type: str</p>
+<p>Absolute path for <code>EXEC</code> with
+<code>auditd_admin_space_left_action</code>.</p>
+<h2 id="auditd_disk_full_action">auditd_disk_full_action</h2>
+<p>Default: <code>SUSPEND</code></p>
+<p>Type: str</p>
+<p>Action when the partition is full. <strong><code>EMAIL</code> is not
+allowed.</strong> For <code>EXEC</code>, set
+<code>auditd_disk_full_action_exe</code>.</p>
+<h2 id="auditd_disk_full_action_exe">auditd_disk_full_action_exe</h2>
+<p>Default: <code>""</code></p>
+<p>Type: str</p>
+<p>Absolute path for <code>EXEC</code> with
+<code>auditd_disk_full_action</code>.</p>
+<h2 id="auditd_disk_error_action">auditd_disk_error_action</h2>
+<p>Default: <code>SUSPEND</code></p>
+<p>Type: str</p>
+<p>Action on disk I/O errors. <strong><code>EMAIL</code> and
+<code>ROTATE</code> are not allowed.</strong> For <code>EXEC</code>, set
+<code>auditd_disk_error_action_exe</code>.</p>
+<h2 id="auditd_disk_error_action_exe">auditd_disk_error_action_exe</h2>
+<p>Default: <code>""</code></p>
+<p>Type: str</p>
+<p>Absolute path for <code>EXEC</code> with
+<code>auditd_disk_error_action</code>.</p>
+<h2 id="auditd_priority_boost">auditd_priority_boost</h2>
+<p>Default: <code>4</code></p>
+<p>Type: int</p>
+<p>Non-negative integer, &lt;= <code>INT_MAX</code>.</p>
+<h2 id="auditd_tcp_listen_port">auditd_tcp_listen_port</h2>
+<p>Default: <code>0</code></p>
+<p>Type: int</p>
+<p>Listen port (<code>0–65535</code>). The value of <code>0</code> means
+this parameter is omitted from auditd.conf, and the listener is disabled
+(the default).</p>
+<h2 id="auditd_tcp_listen_queue">auditd_tcp_listen_queue</h2>
+<p>Default: <code>5</code></p>
+<p>Type: int</p>
+<p>Queue depth (<code>0–65535</code>).</p>
+<h2 id="auditd_tcp_max_per_addr">auditd_tcp_max_per_addr</h2>
+<p>Default: <code>1</code></p>
+<p>Type: int</p>
+<p>Maximum parallel connections per address (<code>1–1024</code>).</p>
+<h2 id="auditd_use_libwrap">auditd_use_libwrap</h2>
+<p>Default: <code>true</code></p>
+<p>Type: bool</p>
+<p>Use libwrap.</p>
+<h2 id="auditd_tcp_client_ports">auditd_tcp_client_ports</h2>
+<p>Default: <code>0</code></p>
+<p>Type: str</p>
+<p>Client port range, either <code>LOW</code> or <code>LOW-HIGH</code>
+(digits only). The max value is <code>65535</code>. The value
+<code>0</code> means to omit this setting from auditd.conf.</p>
+<h2 id="auditd_tcp_client_max_idle">auditd_tcp_client_max_idle</h2>
+<p>Default: <code>0</code></p>
+<p>Type: int</p>
+<p>Idle time in seconds (0–<code>INT_MAX</code>).</p>
+<h2 id="auditd_transport">auditd_transport</h2>
+<p>Default: <code>TCP</code></p>
+<p>Type: str</p>
+<p>Allowed: <code>TCP</code>, <code>KRB5</code> (Kerberos only if auditd
+was built with GSSAPI). If you set <code>auditd_enable_krb5: true</code>
+then the <code>KRB5</code> transport will be used. If you want to use
+<code>auditd_transport</code> to set the transport, ensure
+<code>auditd_enable_krb5</code> is unset.</p>
+<h2 id="auditd_enable_krb5">auditd_enable_krb5</h2>
+<p>Default: <code>false</code></p>
+<p>Type: bool</p>
+<p>If <code>true</code>, enables <code>KRB5</code> transport when
+supported. If <code>false</code> or unset, the value of
+<code>auditd_transport</code> will be used. It is recommended to use
+<code>auditd_transport</code> instead of this parameter to set the
+transport.</p>
+<h2 id="auditd_krb5_principal">auditd_krb5_principal</h2>
+<p>Default: <code>auditd</code></p>
+<p>Type: str</p>
+<p>Kerberos principal name.</p>
+<h2 id="auditd_krb5_key_file">auditd_krb5_key_file</h2>
+<p>Default: <code>""</code></p>
+<p>Type: str</p>
+<p>Path to Kerberos keytab; if empty, the <code>krb5_key_file</code>
+line is omitted.</p>
+<h2 id="auditd_distribute_network">auditd_distribute_network</h2>
+<p>Default: <code>false</code></p>
+<p>Type: bool</p>
+<p>If <code>true</code>, distribute network originating events to the
+audit dispatcher for processing.</p>
+<h2 id="auditd_q_depth">auditd_q_depth</h2>
+<p>Default: <code>2000</code></p>
+<p>Type: int</p>
+<p>Size of internal queue for the audit event dispatcher;
+<code>0–99999</code>.</p>
+<h2 id="auditd_overflow_action">auditd_overflow_action</h2>
+<p>Default: <code>SYSLOG</code></p>
+<p>Type: str</p>
+<p>Allowed: <code>IGNORE</code>, <code>SYSLOG</code>,
+<code>SUSPEND</code>, <code>SINGLE</code>, <code>HALT</code>.</p>
+<h2 id="auditd_max_restarts">auditd_max_restarts</h2>
+<p>Default: <code>10</code></p>
+<p>Type: int</p>
+<p>Maximum plugin restarts (0–<code>INT_MAX</code>).</p>
+<h2 id="auditd_plugin_dir">auditd_plugin_dir</h2>
+<p>Default: <code>/etc/audit/plugins.d</code></p>
+<p>Type: str (path)</p>
+<p>Plugin directory; you probably won't need to change this.</p>
+<h2 id="auditd_end_of_event_timeout">auditd_end_of_event_timeout</h2>
+<p>Default: <code>2</code></p>
+<p>Type: int</p>
+<p>End-of-event timeout in seconds.</p>
+<h2 id="auditd_report_interval">auditd_report_interval</h2>
+<p>Default: <code>"0"</code></p>
+<p>Type: str</p>
+<p>Interval string accepted by <code>time_string_to_seconds</code> (see
+<code>auditd.conf(5)</code>); must not exceed 40 days in auditd.</p>
+<h2 id="auditd_buffer_size">auditd_buffer_size</h2>
+<p>Default: <code>32768</code></p>
+<p>Type: int</p>
+<p>Audit rules: buffer size (<code>-b</code>). Must be a positive
+number.</p>
+<h2 id="auditd_fail_mode">auditd_fail_mode</h2>
+<p>Default: <code>1</code></p>
+<p>Type: int</p>
+<p>Audit rules: failure mode flag (<code>-f</code>). Valid values
+are:</p>
+<ul>
+<li><code>0</code> - silent</li>
+<li><code>1</code> - printk</li>
+<li><code>2</code> - panic - most secure option</li>
+</ul>
+<h2 id="auditd_maximum_rate">auditd_maximum_rate</h2>
+<p>Default: <code>0</code></p>
+<p>Type: int</p>
+<p>Audit rules: maximum messages per second (<code>-r</code>).</p>
+<h2 id="auditd_backlog_wait_time">auditd_backlog_wait_time</h2>
+<p>Default: <code>60000</code></p>
+<p>Type: int</p>
+<p>Audit rules: backlog wait time.</p>
+<h2 id="auditd_enable_flag">auditd_enable_flag</h2>
+<p>Default: <code>1</code></p>
+<p>Type: int</p>
+<p>Audit rules: audit enable flag (<code>-e</code>). Valid values
+are:</p>
+<ul>
+<li><code>0</code> - disable auditing</li>
+<li><code>1</code> - enable auditing</li>
+<li><code>2</code> - lock configuration</li>
+</ul>
+<h2 id="auditd_loginuid_immutable">auditd_loginuid_immutable</h2>
+<p>Default: <code>false</code></p>
+<p>Type: bool</p>
+<p>If <code>true</code>, make loginuids unchangeable once they are set.
+Once the kernel has this active (<code>loginuid_immutable 1</code> in
+<code>auditctl -s</code>), it <strong>cannot</strong> be cleared without
+a <strong>reboot</strong>. If you set this role parameter to
+<code>false</code> while the kernel still reports immutable, the role
+sets the exported variable <code>auditd_reboot_required</code> to
+<code>true</code> unless <code>auditd_reboot_ok</code> is
+<code>true</code>, in which case the role reboots the host and then
+continues.</p>
+<h2 id="auditd_manage_rules">auditd_manage_rules</h2>
+<p>Default: <code>true</code></p>
+<p>Type: bool</p>
+<p>If <code>true</code>, template <code>rules.d/custom.rules</code>. If
+<code>false</code>, the rules file is not managed.</p>
+<h2 id="auditd_purge_rules">auditd_purge_rules</h2>
+<p>Default: <code>false</code></p>
+<p>Type: bool</p>
+<p>If <code>true</code>, delete every file under <code>rules.d/</code>
+(typically <code>/etc/audit/rules.d</code>) before applying the role's
+rules. Other fragments are always removed. <code>custom.rules</code> is
+removed as well unless <code>auditd_manage_rules</code> is
+<code>true</code> and the file on disk already matches the rendered
+<code>auditd_rules</code> template (comparison uses the rule body from
+the first <code>-D</code> line onward, so preamble differences do not
+force a rewrite). In that matching case the deploy task for
+<code>custom.rules</code> is skipped so a second run reports
+<code>changed: false</code>.</p>
+<h2 id="auditd_reboot_ok">auditd_reboot_ok</h2>
+<p>Default: <code>false</code></p>
+<p>Type: bool</p>
+<p>If <code>true</code>, the role may reboot the managed host when
+<code>auditd_loginuid_immutable</code> is <code>false</code> but the
+kernel still has loginuid immutability enabled (see
+<code>auditd_loginuid_immutable</code>). Use only when an immediate
+reboot is acceptable.</p>
+<h2 id="auditd_start_service">auditd_start_service</h2>
+<p>Default: <code>true</code></p>
+<p>Type: bool</p>
+<p>If <code>true</code>, enable/start <code>auditd</code> and allow rule
+load handler behavior that requires a running audit stack.</p>
+<h2 id="auditd_rules">auditd_rules</h2>
+<p>Default: <code>[]</code></p>
+<p>Type: list (elements: dict)</p>
+<h3 id="required-keys">Required keys</h3>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>action</code></td>
+<td>str</td>
+<td><code>always</code> or <code>never</code> (case-insensitive in
+validation).</td>
+</tr>
+<tr>
+<td><code>filter</code></td>
+<td>str</td>
+<td>One of <code>exclude</code>, <code>exit</code>,
+<code>filesystem</code>, <code>io_uring</code>, <code>task</code>,
+<code>user</code>.</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>if <code>filter: filesystem</code> then one <code>field</code> entry
+must be exactly <code>fstype=debugfs</code> or
+<code>fstype=tracefs</code>.</li>
+<li>if <code>filter: io_uring</code> then <code>arch</code> is not
+required; omitting <code>arch</code> does <strong>not</strong> trigger
+the missing-arch warning.</li>
+<li><code>filter: io_uring</code> is only available on EL9 and
+later</li>
+<li>if <code>syscall</code> is set, <code>filter</code> must be
+<strong><code>exit</code></strong> or
+<strong><code>io_uring</code></strong> (syscall rules are not valid with
+other filter types).</li>
+</ul>
+<h3 id="optional-keys">Optional keys</h3>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>arch</code></td>
+<td>str or list of str</td>
+<td>CPU architecture for syscall rules (for example <code>b64</code>,
+<code>b32</code>). Strongly recommended for <code>exit</code> rules; the
+role emits a <strong>warning</strong> when it is omitted (except for
+<code>filter: io_uring</code>). Use the literal <code>nowarn</code> to
+omit the arch from the rule and silence the warning (i.e. you know what
+you are doing). If <code>arch</code> is a <strong>list</strong>, the
+role emits <strong>one rule line per list entry</strong> (same action,
+filter, syscall, path, permission, field, and keyname).
+<code>arch</code> is not required when using
+<code>filter: io_uring</code>.</td>
+</tr>
+<tr>
+<td><code>path</code></td>
+<td>str</td>
+<td>File path filter. <strong>Mutually exclusive</strong> with
+<code>dir</code>. Requires <code>filter: exit</code>. Strongly
+recommended to use either <code>permission</code> or
+<code>syscall</code>. Role will warn unless you use
+<code>permission: nowarn</code>.</td>
+</tr>
+<tr>
+<td><code>dir</code></td>
+<td>str</td>
+<td>Directory path filter. <strong>Mutually exclusive</strong> with
+<code>path</code>. Requires <code>filter: exit</code>. Strongly
+recommended to use either <code>permission</code> or
+<code>syscall</code>. Role will warn unless you use
+<code>permission: nowarn</code>.</td>
+</tr>
+<tr>
+<td><code>permission</code></td>
+<td>str or list of str</td>
+<td>One or more permission tokens mapped to audit <code>perm=</code>
+letters via <code>read-&gt;r</code>, <code>write-&gt;w</code>,
+<code>execute-&gt;x</code>, <code>attribute_change-&gt;a</code>.
+Strongly recommended to use this or <code>syscall</code> when
+<code>path</code> or <code>dir</code> is set. Use
+<code>permission: nowarn</code> to omit permissions from the rule and
+silence the warning (i.e. you know what you are doing).</td>
+</tr>
+<tr>
+<td><code>syscall</code></td>
+<td>str, int, or list of str/int</td>
+<td>Syscall name(s) or number(s). Requires <code>filter: exit</code> or
+<code>filter: io_uring</code>.</td>
+</tr>
+<tr>
+<td><code>field</code></td>
+<td>str or list of str</td>
+<td>Extra field fragment(s) to filter on (<code>nameOPvalue</code>).
+<code>OP</code> must be one of <code>=</code>, <code>!=</code>,
+<code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>,
+<code>&gt;=</code>, <code>&amp;</code>, <code>&amp;=</code>.</td>
+</tr>
+<tr>
+<td><code>keyname</code></td>
+<td>str or list of str</td>
+<td>One or more search keys for the rule. Each key must be <strong>31
+characters or fewer</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="variables-exported-by-the-role">Variables Exported by the
+Role</h1>
+<h2
+id="auditd_auditctl_settings_previous">auditd_auditctl_settings_previous</h2>
+<p>These are the settings printed by <code>auditctl -s</code> prior to
+applying the new settings.</p>
+<h2 id="auditd_reboot_required">auditd_reboot_required</h2>
+<p>Type: bool (host variable set by the role)</p>
+<p>Set to <code>true</code> when the kernel still has loginuid
+immutability enabled but the role is configured with
+<code>auditd_loginuid_immutable: false</code> and
+<code>auditd_reboot_ok</code> is not <code>true</code>. After a
+successful reboot triggered by the role to clear that state, or when no
+reboot is needed, this is <code>false</code>.</p>
+<h1 id="example-playbook">Example playbook</h1>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Manage auditd</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> all</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">auditd_num_logs</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">auditd_flush</span><span class="kw">:</span><span class="at"> incremental_async</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">auditd_freq</span><span class="kw">:</span><span class="at"> </span><span class="dv">50</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">auditd_rules</span><span class="kw">:</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">action</span><span class="kw">:</span><span class="at"> always</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">filter</span><span class="kw">:</span><span class="at"> exit</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">arch</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">b32</span><span class="kw">,</span><span class="at"> b64</span><span class="kw">]</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /etc/passwd</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">permission</span><span class="kw">:</span><span class="at"> write</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">filter</span><span class="kw">:</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> auid&gt;=1000</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> auid!=unset</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">keyname</span><span class="kw">:</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> etc_passwd</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> invalid_write</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.auditd</span></span></code></pre></div>
+<p>More examples are under <a
+href="examples"><code>examples/</code></a>.</p>
+<h1 id="rpm-ostree">rpm-ostree</h1>
+<p>See <a href="README-ostree.md">README-ostree.md</a>.</p>
+<h1 id="license">License</h1>
+<p>MIT.</p>
+<h1 id="author-information">Author Information</h1>
+<p>Maintained as part of <a
+href="https://github.com/linux-system-roles">Linux System Roles</a>.</p>
+</article>
+</body>
+</html>
