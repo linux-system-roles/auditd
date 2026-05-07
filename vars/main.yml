@@ -49,15 +49,19 @@ __auditd_required_facts:
 __auditd_required_facts_subsets: "{{ ['!all', '!min'] + __auditd_required_facts }}"
 
 # BEGIN - DO NOT EDIT THIS BLOCK - rh distros variables
+# Ansible distribution identifiers that the role treats like RHEL
 __auditd_rh_distros:
   - AlmaLinux
   - CentOS
   - RedHat
   - Rocky
 
+# Same as above but includes Fedora
 __auditd_rh_distros_fedora: "{{ __auditd_rh_distros + ['Fedora'] }}"
 
+# Use this in conditionals to check if distro is Red Hat or clone
 __auditd_is_rh_distro: "{{ ansible_facts['distribution'] in __auditd_rh_distros }}"
 
+# Use this in conditionals to check if distro is Red Hat or clone, or Fedora
 __auditd_is_rh_distro_fedora: "{{ ansible_facts['distribution'] in __auditd_rh_distros_fedora }}"
 # END - DO NOT EDIT THIS BLOCK - rh distros variables
