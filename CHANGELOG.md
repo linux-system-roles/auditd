@@ -1,6 +1,13 @@
 Changelog
 =========
 
+[1.0.1] - 2026-05-08
+--------------------
+
+### Other Changes
+
+- refactor: use min_ansible_version 2.9 to be consistent with other roles [citest_skip] (#8)
+
 [1.0.0] - 2026-05-07
 --------------------
 
