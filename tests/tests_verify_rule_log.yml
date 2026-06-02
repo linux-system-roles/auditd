@@ -32,7 +32,7 @@
           changed_when: false
 
         - name: Verify audit event for auditd_test_rule_log
-          ansible.builtin.command: ausearch -k auditd_test_rule_log -f /etc/hosts --format text
+          ansible.builtin.command: ausearch --input-logs -k auditd_test_rule_log -f /etc/hosts --format text
           changed_when: false
           register: __audit_event
           failed_when: __audit_event.stdout is not search("opened-file /etc/hosts")
@@ -44,9 +44,9 @@
             cmd: |
               set -euxo pipefail
               exec 1>&2
-              ausearch -k auditd_test_rule_log --format text || :
-              ausearch -k auditd_test_rule_log -f /etc/hosts --format text || :
-              ausearch -f /etc/hosts --format text || :
+              ausearch --input-logs -k auditd_test_rule_log --format text || :
+              ausearch --input-logs -k auditd_test_rule_log -f /etc/hosts --format text || :
+              ausearch --input-logs -f /etc/hosts --format text || :
               journalctl -ex | grep audit || :
           changed_when: false
           failed_when: true
