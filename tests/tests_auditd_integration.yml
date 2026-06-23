@@ -14,6 +14,10 @@
             __filter: "{{ 'exit'
               if ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] == '8'
               else 'io_uring' }}"
+            __test_arch_list: "{{ ['b32', 'b64'] if __b32_supported else ['b64'] }}"
+          vars:
+            # b32 is not supported on ppc64le
+            __b32_supported: "{{ ansible_facts['architecture'] != 'ppc64le' }}"
 
         - name: Run auditd role with non-default settings
           ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
@@ -73,19 +77,19 @@
               - action: always
                 filter: exit
                 arch: nowarn
-                syscall: open
+                syscall: openat
                 keyname: lsr_arch_nw
               # arch list -> one line per arch
               - action: always
                 filter: exit
-                arch: [b32, b64]
+                arch: "{{ __test_arch_list }}"
                 syscall: read
                 keyname: lsr_arch_pair
               # path + permission nowarn (no -F perm)
               - action: always
                 filter: exit
                 arch: b64
-                syscall: open
+                syscall: openat
                 path: /etc/hosts
                 permission: nowarn
                 keyname: lsr_path_nw
@@ -93,7 +97,7 @@
               - action: always
                 filter: exit
                 arch: b64
-                syscall: open
+                syscall: openat
                 dir: /etc/ssh
                 permission: read
                 keyname: lsr_dir_one_perm
@@ -112,14 +116,14 @@
                 filter: exit
                 arch: b64
                 syscall:
-                  - open
+                  - openat
                   - close
                 keyname: lsr_sc_list
               # field list covering operators =, !=, <, >, <=, >=, &, &=
               - action: always
                 filter: exit
                 arch: b64
-                syscall: open
+                syscall: openat
                 path: /etc/issue
                 permission: read
                 field:
@@ -230,15 +234,15 @@
             __auditd_integration_expected_rule_lines:
               - "-a never,filesystem -F fstype=debugfs -F key=lsr_fs_dbg"
               - "-a always,{{ __filter }} -S openat,openat2 -F key=lsr_io_uring"
-              - "-a always,exit -S open -F key=lsr_arch_nw"
-              - "-a always,exit -F arch=b32 -S read -F key=lsr_arch_pair"
+              - "-a always,exit -S openat -F key=lsr_arch_nw"
+              - "-a always,exit -F arch={{ __test_arch_list[0] }} -S read -F key=lsr_arch_pair"
               - "-a always,exit -F arch=b64 -S read -F key=lsr_arch_pair"
-              - "-a always,exit -F arch=b64 -S open -F path=/etc/hosts -F key=lsr_path_nw"
-              - "-a always,exit -F arch=b64 -S open -F dir=/etc/ssh -F perm=r -F key=lsr_dir_one_perm"
+              - "-a always,exit -F arch=b64 -S openat -F path=/etc/hosts -F key=lsr_path_nw"
+              - "-a always,exit -F arch=b64 -S openat -F dir=/etc/ssh -F perm=r -F key=lsr_dir_one_perm"
               - "-a always,exit -F arch=b64 -S openat -F dir=/tmp -F perm=rw -F key=lsr_dir_many_perm"
-              - "-a always,exit -F arch=b64 -S open,close -F key=lsr_sc_list"
+              - "-a always,exit -F arch=b64 -S openat,close -F key=lsr_sc_list"
               - >-
-                -a always,exit -F arch=b64 -S open -F path=/etc/issue -F perm=r -F success=1 -F auid!=-1 -F exit<-1
+                -a always,exit -F arch=b64 -S openat -F path=/etc/issue -F perm=r -F success=1 -F auid!=-1 -F exit<-1
                 -F gid>10 -F euid<=65534 -F pid>=0 -F a1&0100 -F a2&=0200 -F key=lsr_ops -F key=lsr_ops2 -F key=lsr_ops3
               - "-a always,exit -F arch=b64 -S dup -F key=kk1 -F key=kk2"
 
