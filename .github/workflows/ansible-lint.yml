@@ -16,7 +16,17 @@ permissions:
   contents: read
   pull-requests: read
 jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump github context
+        run:   echo "$GITHUB_CONTEXT"
+        shell: bash
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+
   ansible_lint:
+    needs: debug
     if: |
       (
         github.event_name == 'issue_comment'
