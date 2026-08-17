@@ -25,37 +25,7 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
 
-  ansible_lint:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        # There should be one version which is the one used by the Automation Hub gating, and
-        # one for the latest version.
-        # https://github.com/ansible-collections/partner-certification-checker/blob/main/.github/workflows/certification-reusable.yml#L108
-        versions:
-          - { ansible_lint: "24.*", ansible: "2.16.*", python: "3.12" }
-          - { ansible_lint: "26.*", ansible: "2.20.*", python: "3.13" }
-    steps:
-      - name: Update pip, git
-        run: |
-          set -euxo pipefail
-          sudo apt update
-          sudo apt install -y git
-
-      - name: Get PR head SHA
-        if: github.event_name == 'issue_comment'
-        id: pr_sha
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
-          PR_NO: ${{ github.event.issue.number }}
-        run: |
-          set -euxo pipefail
-          head_sha=$(gh api "repos/$REPO/pulls/$PR_NO" --jq '.head.sha')
-          echo "head_sha=$head_sha" >> "$GITHUB_OUTPUT"
-
-      - name: Checkout repo
+      - name: Try the if condition
         if: |
           (
             github.event_name == 'issue_comment'
@@ -90,6 +60,43 @@ jobs:
                         github.event.pull_request.author_association)
                 || github.event.sender.login == 'systemroller')
           )
+        run: |
+          echo the condition ran
+          exit 1
+        shell: bash
+
+  ansible_lint:
+    needs: debug
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # There should be one version which is the one used by the Automation Hub gating, and
+        # one for the latest version.
+        # https://github.com/ansible-collections/partner-certification-checker/blob/main/.github/workflows/certification-reusable.yml#L108
+        versions:
+          - { ansible_lint: "24.*", ansible: "2.16.*", python: "3.12" }
+          - { ansible_lint: "26.*", ansible: "2.20.*", python: "3.13" }
+    steps:
+      - name: Update pip, git
+        run: |
+          set -euxo pipefail
+          sudo apt update
+          sudo apt install -y git
+
+      - name: Get PR head SHA
+        if: github.event_name == 'issue_comment'
+        id: pr_sha
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NO: ${{ github.event.issue.number }}
+        run: |
+          set -euxo pipefail
+          head_sha=$(gh api "repos/$REPO/pulls/$PR_NO" --jq '.head.sha')
+          echo "head_sha=$head_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
