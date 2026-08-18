@@ -31,8 +31,10 @@ jobs:
         if: contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association) || github.event.sender.login == 'systemroller'
         run: echo event is owner, member, collaborator or systemroller
       - name: fail
-        run: exit 1
+        run: echo "AUTHOR_ASSOCIATION=$AUTHOR_ASSOCIATION"; exit 1
         shell: bash
+        env:
+          AUTHOR_ASSOCIATION: ${{ github.event.pull_request.author_association }}
   ansible_lint:
     needs: debug
     name: ansible-lint
