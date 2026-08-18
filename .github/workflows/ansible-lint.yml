@@ -6,6 +6,8 @@ on:  # yamllint disable-line rule:truthy
       - created
   pull_request:
     types:
+      - opened
+      - synchronize
       - labeled
 env:
   LSR_ROLE2COLL_NAMESPACE: fedora
@@ -14,45 +16,39 @@ permissions:
   contents: read
   pull-requests: read
 jobs:
-  debug:
-    name: debug
-    runs-on: ubuntu-latest
-    steps:
-      - name: is pull request
-        if: github.event_name == 'pull_request'
-        run: echo event is pull_request
-      - name: is labeled
-        if: github.event.action == 'labeled'
-        run: echo event action is labeled
-      - name: is citest or citest_ansible-lint
-        if: github.event.label.name == 'citest' || github.event.label.name == 'citest_ansible-lint'
-        run: echo event is citest or citest_ansible-lint
-      - name: is owner, member, collaborator or systemroller
-        if: contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association) || github.event.sender.login == 'systemroller'
-        run: echo event is owner, member, collaborator or systemroller
-      - name: fail
-        run: echo "AUTHOR_ASSOCIATION=$AUTHOR_ASSOCIATION"; exit 1
-        shell: bash
-        env:
-          AUTHOR_ASSOCIATION: ${{ github.event.pull_request.author_association }}
   ansible_lint:
-    needs: debug
-    name: ansible-lint
     if: |
       (
         github.event_name == 'issue_comment'
         && github.event.issue.pull_request
         && (contains(github.event.comment.body, '[citest]')
             || contains(github.event.comment.body, '[citest_ansible-lint]'))
-        && (contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+        && (contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'),
+                     github.event.comment.author_association)
             || github.event.comment.user.login == 'systemroller')
+      ) || (
+        github.event_name == 'pull_request'
+        && github.event.action == 'opened'
+        && (contains(github.event.pull_request.labels.*.name, 'citest')
+            || contains(github.event.pull_request.labels.*.name, 'citest_ansible-lint'))
+        && (contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'),
+                     github.event.pull_request.author_association)
+            || github.event.pull_request.user.login == 'systemroller')
+      ) || (
+        github.event_name == 'pull_request'
+        && github.event.action == 'synchronize'
+        && (contains(github.event.pull_request.labels.*.name, 'citest')
+            || contains(github.event.pull_request.labels.*.name, 'citest_ansible-lint'))
+        && (contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'),
+                     github.event.pull_request.author_association)
+            || github.event.sender.login == 'systemroller')
       ) || (
         github.event_name == 'pull_request'
         && github.event.action == 'labeled'
         && (github.event.label.name == 'citest'
             || github.event.label.name == 'citest_ansible-lint')
         && (contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'),
-                      github.event.pull_request.author_association)
+                     github.event.pull_request.author_association)
             || github.event.sender.login == 'systemroller')
       )
     runs-on: ubuntu-latest
