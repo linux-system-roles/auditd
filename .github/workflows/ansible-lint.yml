@@ -4,11 +4,15 @@ on:  # yamllint disable-line rule:truthy
   issue_comment:
     types:
       - created
+  pull_request:
+    types:
+      - labeled
 env:
   LSR_ROLE2COLL_NAMESPACE: fedora
   LSR_ROLE2COLL_NAME: linux_system_roles
 permissions:
   contents: read
+  pull-requests: read
 jobs:
   ansible_lint:
     name: ansible-lint
@@ -20,6 +24,14 @@ jobs:
             || contains(github.event.comment.body, '[citest_ansible-lint]'))
         && (contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
             || github.event.comment.user.login == 'systemroller')
+      ) || (
+        github.event_name == 'pull_request'
+        && github.event.action == 'labeled'
+        && (github.event.label.name == 'citest'
+            || github.event.label.name == 'citest_ansible-lint')
+        && (contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'),
+                      github.event.pull_request.author_association)
+            || github.event.sender.login == 'systemroller')
       )
     runs-on: ubuntu-latest
     strategy:
