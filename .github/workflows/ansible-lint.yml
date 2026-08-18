@@ -11,11 +11,15 @@ permissions:
   contents: read
 jobs:
   ansible_lint:
+    name: ansible-lint
     if: |
-      github.event.issue.pull_request
-      && contains(github.event.comment.body, '[citest]')
-      && (contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
-      || github.event.comment.user.login == 'systemroller')
+      (
+        github.event_name == 'issue_comment'
+        && github.event.issue.pull_request
+        && contains(github.event.comment.body, '[citest]')
+        && (contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+            || github.event.comment.user.login == 'systemroller')
+      )
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
