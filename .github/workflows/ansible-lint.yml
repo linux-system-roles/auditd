@@ -18,21 +18,21 @@ jobs:
     name: debug
     runs-on: ubuntu-latest
     steps:
-      - name: Debug
-        if: |
-          github.event_name == 'pull_request'
-          && github.event.action == 'labeled'
-          && (github.event.label.name == 'citest'
-              || github.event.label.name == 'citest_ansible-lint')
-          && (contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'),
-                        github.event.pull_request.author_association)
-              || github.event.sender.login == 'systemroller')
-        run: echo YES
-      - name: Dump github context and fail
-        run: echo "$GITHUB_CONTEXT"; exit 1
+      - name: is pull request
+        if: github.event_name == 'pull_request'
+        run: echo event is pull_request
+      - name: is labeled
+        if: github.event.action == 'labeled'
+        run: echo event action is labeled
+      - name: is citest or citest_ansible-lint
+        if: github.event.label.name == 'citest' || github.event.label.name == 'citest_ansible-lint'
+        run: echo event is citest or citest_ansible-lint
+      - name: is owner, member, collaborator or systemroller
+        if: contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association) || github.event.sender.login == 'systemroller'
+        run: echo event is owner, member, collaborator or systemroller
+      - name: fail
+        run: exit 1
         shell: bash
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
   ansible_lint:
     needs: debug
     name: ansible-lint
