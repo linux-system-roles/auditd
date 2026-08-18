@@ -14,7 +14,27 @@ permissions:
   contents: read
   pull-requests: read
 jobs:
+  debug:
+    name: debug
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug
+        if: |
+          github.event_name == 'pull_request'
+          && github.event.action == 'labeled'
+          && (github.event.label.name == 'citest'
+              || github.event.label.name == 'citest_ansible-lint')
+          && (contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'),
+                        github.event.pull_request.author_association)
+              || github.event.sender.login == 'systemroller')
+        run: echo YES
+      - name: Dump github context and fail
+        run: echo "$GITHUB_CONTEXT"; exit 1
+        shell: bash
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
   ansible_lint:
+    needs: debug
     name: ansible-lint
     if: |
       (
