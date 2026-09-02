@@ -568,9 +568,6 @@ role to clear that state, or when no reboot is needed, this is `false`.
         arch: [b32, b64]
         path: /etc/passwd
         permission: write
-        filter:
-          - auid>=1000
-          - auid!=unset
         keyname:
           - etc_passwd
           - invalid_write
