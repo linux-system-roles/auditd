@@ -28,6 +28,7 @@ auditd_flush: INCREMENTAL_ASYNC
 auditd_freq: 50
 auditd_krb5_key_file: ""
 auditd_krb5_principal: auditd
+auditd_kernel_enable: false
 auditd_local_events: true
 auditd_log_file: /var/log/audit/audit.log
 auditd_log_format: ENRICHED

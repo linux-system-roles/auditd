@@ -8,6 +8,19 @@
 - name: Validate role parameters
   ansible.builtin.include_tasks: assert_role_vars.yml
 
+- name: Fail when auditing is disabled in the kernel
+  ansible.builtin.fail:
+    msg: >-
+      Auditing is disabled in the kernel. Set auditd_kernel_enable: true and
+      auditd_reboot_ok: true if you want the auditd role to enable auditing.
+  when:
+    - not auditd_kernel_enable | bool
+    - ansible_facts['proc_cmdline']['audit'] | default('') | string | lower in ['0', 'off']
+
+- name: Enable auditing in the currently booted kernel
+  ansible.builtin.include_tasks: kernel_enable.yml
+  when: auditd_kernel_enable | bool
+
 - name: Install audit packages
   ansible.builtin.package:
     name: "{{ __auditd_packages }}"

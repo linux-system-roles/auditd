@@ -36,6 +36,31 @@ role variables for yes/no daemon options are rendered as the strings `yes` or
 `tasks/assert_role_vars.yml` using the same limits as the audit-userspace
 parsers (for example `num_logs` <= 999).
 
+### auditd_kernel_enable
+
+Default: `false`
+
+Type: bool
+
+When `true`, use the `fedora.linux_system_roles.bootloader` role to inspect the
+currently booted kernel and ensure that its configured kernel command line
+contains `audit=1`. Only the currently booted kernel is checked and modified.
+A reboot may be required before the setting takes effect; if you want the role
+to reboot the system before continuing, set `auditd_reboot_ok: true`.
+
+For example, enable auditing and optionally allow the role to reboot so the
+setting takes effect immediately:
+
+```yaml
+auditd_kernel_enable: true
+auditd_reboot_ok: true
+```
+
+To manage the audit kernel command-line option for all installed kernels, use
+the `fedora.linux_system_roles.bootloader` role directly with `kernel: ALL`.
+When this option is `false`, the role fails if the running kernel command line
+explicitly disables auditing with `audit=0` or `audit=off`.
+
 ### auditd_local_events
 
 Default: `true`
@@ -494,8 +519,9 @@ Default: `false`
 
 Type: bool
 
-If `true`, the role may reboot the managed host when `auditd_loginuid_immutable`
-is `false` but the kernel still has loginuid immutability enabled (see
+If `true`, the role may reboot the managed host when enabling kernel auditing
+with `auditd_kernel_enable`, or when `auditd_loginuid_immutable` is `false` but
+the kernel still has loginuid immutability enabled (see
 `auditd_loginuid_immutable`). Use only when an immediate reboot is acceptable.
 
 ### auditd_start_service
