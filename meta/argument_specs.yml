@@ -101,6 +101,8 @@ argument_specs:
         type: str
       auditd_krb5_principal:
         type: str
+      auditd_kernel_enable:
+        type: bool
       auditd_local_events:
         type: bool
       auditd_log_file:

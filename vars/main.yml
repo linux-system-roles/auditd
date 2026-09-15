@@ -41,9 +41,11 @@ __auditd_rules_permission_keys:
   - nowarn
 
 __auditd_required_facts:
+  - cmdline  # this is also for proc_cmdline
   - distribution
   - distribution_major_version
   - distribution_version
+  - kernel
   - os_family
 
 __auditd_required_facts_subsets: "{{ ['!all', '!min'] + __auditd_required_facts }}"
