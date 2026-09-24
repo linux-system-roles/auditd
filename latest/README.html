@@ -143,6 +143,8 @@ id="toc-collection-requirements">Collection requirements</a></li>
 </ul></li>
 <li><a href="#role-variables" id="toc-role-variables">Role variables</a>
 <ul>
+<li><a href="#auditd_kernel_enable"
+id="toc-auditd_kernel_enable">auditd_kernel_enable</a></li>
 <li><a href="#auditd_local_events"
 id="toc-auditd_local_events">auditd_local_events</a></li>
 <li><a href="#auditd_write_logs"
@@ -304,6 +306,27 @@ yes/no daemon options are rendered as the strings <code>yes</code> or
 <code>tasks/assert_role_vars.yml</code> using the same limits as the
 audit-userspace parsers (for example <code>num_logs</code> &lt;=
 999).</p>
+<h2 id="auditd_kernel_enable">auditd_kernel_enable</h2>
+<p>Default: <code>false</code></p>
+<p>Type: bool</p>
+<p>When <code>true</code>, use the
+<code>fedora.linux_system_roles.bootloader</code> role to inspect the
+currently booted kernel and ensure that its configured kernel command
+line contains <code>audit=1</code>. Only the currently booted kernel is
+checked and modified. A reboot may be required before the setting takes
+effect; if you want the role to reboot the system before continuing, set
+<code>auditd_reboot_ok: true</code>.</p>
+<p>For example, enable auditing and optionally allow the role to reboot
+so the setting takes effect immediately:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">auditd_kernel_enable</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">auditd_reboot_ok</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span></code></pre></div>
+<p>To manage the audit kernel command-line option for all installed
+kernels, use the <code>fedora.linux_system_roles.bootloader</code> role
+directly with <code>kernel: ALL</code>. When this option is
+<code>false</code>, the role fails if the running kernel command line
+explicitly disables auditing with <code>audit=0</code> or
+<code>audit=off</code>.</p>
 <h2 id="auditd_local_events">auditd_local_events</h2>
 <p>Default: <code>true</code></p>
 <p>Type: bool</p>
@@ -597,6 +620,7 @@ force a rewrite). In that matching case the deploy task for
 <p>Default: <code>false</code></p>
 <p>Type: bool</p>
 <p>If <code>true</code>, the role may reboot the managed host when
+enabling kernel auditing with <code>auditd_kernel_enable</code>, or when
 <code>auditd_loginuid_immutable</code> is <code>false</code> but the
 kernel still has loginuid immutability enabled (see
 <code>auditd_loginuid_immutable</code>). Use only when an immediate
@@ -738,24 +762,24 @@ immutability enabled but the role is configured with
 successful reboot triggered by the role to clear that state, or when no
 reboot is needed, this is <code>false</code>.</p>
 <h1 id="example-playbook">Example playbook</h1>
-<div class="sourceCode" id="cb2"><pre
-class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Manage auditd</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> all</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">auditd_num_logs</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">auditd_flush</span><span class="kw">:</span><span class="at"> incremental_async</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">auditd_freq</span><span class="kw">:</span><span class="at"> </span><span class="dv">50</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">auditd_rules</span><span class="kw">:</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">action</span><span class="kw">:</span><span class="at"> always</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">filter</span><span class="kw">:</span><span class="at"> exit</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">arch</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">b32</span><span class="kw">,</span><span class="at"> b64</span><span class="kw">]</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /etc/passwd</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">permission</span><span class="kw">:</span><span class="at"> write</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">keyname</span><span class="kw">:</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> etc_passwd</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> invalid_write</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.auditd</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Manage auditd</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> all</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">auditd_num_logs</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">auditd_flush</span><span class="kw">:</span><span class="at"> incremental_async</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">auditd_freq</span><span class="kw">:</span><span class="at"> </span><span class="dv">50</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">auditd_rules</span><span class="kw">:</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">action</span><span class="kw">:</span><span class="at"> always</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">filter</span><span class="kw">:</span><span class="at"> exit</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">arch</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">b32</span><span class="kw">,</span><span class="at"> b64</span><span class="kw">]</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /etc/passwd</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">permission</span><span class="kw">:</span><span class="at"> write</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">keyname</span><span class="kw">:</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> etc_passwd</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> invalid_write</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.auditd</span></span></code></pre></div>
 <p>More examples are under <a
 href="examples"><code>examples/</code></a>.</p>
 <h1 id="rpm-ostree">rpm-ostree</h1>
