@@ -6,6 +6,11 @@
   tags:
     - tests::reboot
   tasks:
+    # The bootloader role, which kernel enablement uses, does not support SUSE yet
+    - name: Skip kernel audit enablement on SUSE
+      ansible.builtin.meta: end_host
+      when: ansible_facts['os_family'] == 'Suse'
+
     - name: Exercise kernel audit enablement and restore the original state
       block:
         - name: Back up existing auditd configuration and rules
