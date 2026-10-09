@@ -71,7 +71,7 @@
   vars:
     __valid_filters: "{{ ['exit']
       if ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] == '8'
-      else ['exit', 'io_uring'] }}"
+      else ['exit', 'io_uring'] | intersect(__auditd_rules_filters) }}"
 
 - name: Assert auditd_rules field is a non-empty string or list of non-empty strings
   ansible.builtin.assert:

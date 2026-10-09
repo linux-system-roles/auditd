@@ -12,7 +12,8 @@
         - name: Set filter based on platform/version
           ansible.builtin.set_fact:
             __filter: "{{ 'exit'
-              if ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] == '8'
+              if (ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] == '8')
+                 or ansible_facts['os_family'] == 'Suse'
               else 'io_uring' }}"
             __test_arch_list: "{{ ['b32', 'b64'] if __b32_supported else ['b64'] }}"
           vars:
