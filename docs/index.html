@@ -315,7 +315,9 @@ currently booted kernel and ensure that its configured kernel command
 line contains <code>audit=1</code>. Only the currently booted kernel is
 checked and modified. A reboot may be required before the setting takes
 effect; if you want the role to reboot the system before continuing, set
-<code>auditd_reboot_ok: true</code>.</p>
+<code>auditd_reboot_ok: true</code>. This is not yet supported on SUSE
+systems, because the <code>bootloader</code> role does not support
+them.</p>
 <p>For example, enable auditing and optionally allow the role to reboot
 so the setting takes effect immediately:</p>
 <div class="sourceCode" id="cb2"><pre
