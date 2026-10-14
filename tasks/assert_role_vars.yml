@@ -96,6 +96,7 @@
     that:
       - auditd_tcp_max_per_addr | int >= 1
       - auditd_tcp_max_per_addr | int <= 1024
+    fail_msg: auditd_tcp_max_per_addr must be between 1 and 1024 inclusive
 
 - name: Assert tcp_client_max_idle range (tcp_client_max_idle_parser)
   ansible.builtin.assert:

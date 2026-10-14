@@ -4,6 +4,13 @@
 # Each block runs include_role expecting failure; rescue records that outcome.
 - name: Verify invalid parameters are rejected
   hosts: all
+  vars:
+    __invalid_input_failure_messages: >-
+      {{ ([ansible_failed_result.msg | default(''),
+           ansible_failed_result.msg.msg | default('')]
+          + (ansible_failed_result.results | default([])
+             | map(attribute='msg') | map('default', '') | list))
+         | join(' ') }}
   tasks:
     # --- meta/argument_specs (invalid choice / type) ---
     # Role argument validation requires Ansible 2.10+; skipped on older versions.
@@ -25,6 +32,9 @@
             - name: Mark invalid transport rejected
               ansible.builtin.set_fact:
                 __invalid_input_transport_arg_spec_failed: true
+              when: >-
+                "value of auditd_transport must be one of: tcp, krb5, TCP, KRB5, got: not_a_valid_transport" in
+                __invalid_input_failure_messages
 
         - name: Assert invalid auditd_transport failed validation
           when: ansible_version.full is version('2.10', '>=')
@@ -47,6 +57,11 @@
             - name: Mark invalid log_format rejected
               ansible.builtin.set_fact:
                 __invalid_input_log_format_arg_spec_failed: true
+              when: >-
+                "value of auditd_log_format must be one of: raw, nolog, enriched" in
+                __invalid_input_failure_messages and
+                "got: invalid_log_format_value" in
+                __invalid_input_failure_messages
 
         - name: Assert invalid auditd_log_format failed validation
           when: ansible_version.full is version('2.10', '>=')
@@ -70,6 +85,9 @@
             - name: Mark num_logs range rejected
               ansible.builtin.set_fact:
                 __invalid_input_num_logs_assert_failed: true
+              when: >-
+                "auditd_num_logs must be between 0 and 999 inclusive" in
+                __invalid_input_failure_messages
 
         - name: Assert auditd_num_logs above 999 failed assert validation
           ansible.builtin.assert:
@@ -88,6 +106,9 @@
             - name: Mark auditd_buffer_size non-positive rejected
               ansible.builtin.set_fact:
                 __invalid_input_buffer_size_assert_failed: true
+              when: >-
+                "auditd_buffer_size must be a positive integer" in
+                __invalid_input_failure_messages
 
         - name: Assert auditd_buffer_size not positive failed assert validation
           ansible.builtin.assert:
@@ -108,6 +129,9 @@
             - name: Mark flush or freq rejected
               ansible.builtin.set_fact:
                 __invalid_input_flush_freq_assert_failed: true
+              when: >-
+                "When auditd_flush is incremental or incremental_async, auditd_freq must be greater than 0" in
+                __invalid_input_failure_messages
 
         - name: Assert incremental flush with zero freq failed assert validation
           ansible.builtin.assert:
@@ -128,6 +152,9 @@
             - name: Mark q_depth range rejected
               ansible.builtin.set_fact:
                 __invalid_input_q_depth_assert_failed: true
+              when: >-
+                "auditd_q_depth must be between 0 and 99999 inclusive" in
+                __invalid_input_failure_messages
 
         - name: Assert auditd_q_depth above 99999 failed assert validation
           ansible.builtin.assert:
@@ -146,6 +173,9 @@
             - name: Mark tcp_max_per_addr below minimum rejected
               ansible.builtin.set_fact:
                 __invalid_input_tcp_max_per_addr_low_assert_failed: true
+              when: >-
+                "auditd_tcp_max_per_addr must be between 1 and 1024 inclusive" in
+                __invalid_input_failure_messages
 
         - name: Assert auditd_tcp_max_per_addr below 1 failed assert validation
           ansible.builtin.assert:
@@ -165,6 +195,9 @@
             - name: Mark tcp_max_per_addr above maximum rejected
               ansible.builtin.set_fact:
                 __invalid_input_tcp_max_per_addr_high_assert_failed: true
+              when: >-
+                "auditd_tcp_max_per_addr must be between 1 and 1024 inclusive" in
+                __invalid_input_failure_messages
 
         - name: Assert auditd_tcp_max_per_addr above 1024 failed assert validation
           ansible.builtin.assert:
@@ -184,6 +217,9 @@
             - name: Mark auditd_enable_flag range rejected
               ansible.builtin.set_fact:
                 __invalid_input_enable_flag_assert_failed: true
+              when: >-
+                "auditd_enable_flag must be 0, 1, or 2" in
+                __invalid_input_failure_messages
 
         - name: Assert auditd_enable_flag outside 0 to 2 failed assert validation
           ansible.builtin.assert:
@@ -203,6 +239,9 @@
             - name: Mark auditd_fail_mode range rejected
               ansible.builtin.set_fact:
                 __invalid_input_fail_mode_assert_failed: true
+              when: >-
+                "auditd_fail_mode must be 0, 1, or 2" in
+                __invalid_input_failure_messages
 
         - name: Assert auditd_fail_mode outside 0 to 2 failed assert validation
           ansible.builtin.assert:
@@ -222,6 +261,9 @@
             - name: Mark auditd_maximum_rate format rejected
               ansible.builtin.set_fact:
                 __invalid_input_maximum_rate_assert_failed: true
+              when: >-
+                "auditd_maximum_rate must be null, empty, or a non-negative integer (digits only)" in
+                __invalid_input_failure_messages
 
         - name: Assert invalid auditd_maximum_rate failed assert validation
           ansible.builtin.assert:
@@ -242,6 +284,9 @@
             - name: Mark auditd_backlog_wait_time format rejected
               ansible.builtin.set_fact:
                 __invalid_input_backlog_wait_time_assert_failed: true
+              when: >-
+                "auditd_backlog_wait_time must be null, empty, or a non-negative integer (digits only)" in
+                __invalid_input_failure_messages
 
         - name: Assert invalid auditd_backlog_wait_time failed assert validation
           ansible.builtin.assert:
@@ -262,6 +307,11 @@
             - name: Mark space_left percentage range rejected
               ansible.builtin.set_fact:
                 __invalid_input_space_left_pct_assert_failed: true
+              when: >-
+                "When auditd_space_left is digits followed by %" in
+                __invalid_input_failure_messages and
+                "the number must be between 1 and 99 inclusive" in
+                __invalid_input_failure_messages
 
         - name: Assert auditd_space_left zero percent failed assert validation
           ansible.builtin.assert:
@@ -282,6 +332,11 @@
             - name: Mark admin_space_left percentage range rejected
               ansible.builtin.set_fact:
                 __invalid_input_admin_space_left_pct_assert_failed: true
+              when: >-
+                "When auditd_admin_space_left is digits followed by %" in
+                __invalid_input_failure_messages and
+                "the number must be between 1 and 99 inclusive" in
+                __invalid_input_failure_messages
 
         - name: Assert auditd_admin_space_left zero percent failed assert validation
           ansible.builtin.assert:
@@ -303,6 +358,11 @@
             - name: Mark space_left vs admin_space_left ordering rejected
               ansible.builtin.set_fact:
                 __invalid_input_sl_asl_order_pct_assert_failed: true
+              when: >-
+                "When auditd_space_left and auditd_admin_space_left are both percentages" in
+                __invalid_input_failure_messages and
+                "the value for auditd_space_left must be greater than auditd_admin_space_left" in
+                __invalid_input_failure_messages
 
         - name: Assert space_left vs admin_space_left percentage ordering failed validation
           ansible.builtin.assert:
@@ -324,6 +384,11 @@
             - name: Mark space_left vs admin_space_left ordering rejected
               ansible.builtin.set_fact:
                 __invalid_input_sl_asl_order_mib_assert_failed: true
+              when: >-
+                "When auditd_space_left and auditd_admin_space_left are both percentages" in
+                __invalid_input_failure_messages and
+                "the value for auditd_space_left must be greater than auditd_admin_space_left" in
+                __invalid_input_failure_messages
 
         - name: Assert space_left vs admin_space_left MIB value ordering failed validation
           ansible.builtin.assert:
@@ -345,6 +410,9 @@
             - name: Mark exec path requirement rejected
               ansible.builtin.set_fact:
                 __invalid_input_exec_exe_assert_failed: true
+              when: >-
+                "auditd_max_log_file_action_exe is required when auditd_max_log_file_action is exec" in
+                __invalid_input_failure_messages
 
         - name: Assert exec without max_log_file_action_exe failed assert validation
           ansible.builtin.assert:
@@ -365,6 +433,9 @@
             - name: Mark tcp_client_ports format rejected
               ansible.builtin.set_fact:
                 __invalid_input_tcp_ports_assert_failed: true
+              when: >-
+                "auditd_tcp_client_ports must be digits or LOW-HIGH with digits only" in
+                __invalid_input_failure_messages
 
         - name: Assert invalid tcp_client_ports failed assert validation
           ansible.builtin.assert:
@@ -383,6 +454,9 @@
             - name: Mark reversed tcp_client_ports rejected
               ansible.builtin.set_fact:
                 __invalid_input_tcp_ports_range_assert_failed: true
+              when: >-
+                "auditd_tcp_client_ports range is reversed" in
+                __invalid_input_failure_messages
 
         - name: Assert reversed tcp_client_ports range failed assert validation
           ansible.builtin.assert:
@@ -402,6 +476,11 @@
             - name: Mark incomplete auditd_rules rejected
               ansible.builtin.set_fact:
                 __invalid_input_rules_assert_failed: true
+              when: >-
+                "Each auditd_rules entry must define string action (always, never)" in
+                __invalid_input_failure_messages and
+                "and string filter (exclude, exit, filesystem, io_uring, task, user)" in
+                __invalid_input_failure_messages
 
         - name: Assert auditd_rules without action and filter failed validation
           ansible.builtin.assert:
@@ -424,6 +503,11 @@
             - name: Mark filesystem fstype rule rejected
               ansible.builtin.set_fact:
                 __invalid_input_rules_fs_fstype_failed: true
+              when: >-
+                "auditd_rules entry with filter filesystem must define field" in
+                __invalid_input_failure_messages and
+                "with fstype=debugfs or fstype=tracefs" in
+                __invalid_input_failure_messages
 
         - name: Assert filesystem rule without fstype=debugfs|tracefs failed validation
           ansible.builtin.assert:
@@ -449,6 +533,9 @@
             - name: Mark path and dir together rejected
               ansible.builtin.set_fact:
                 __invalid_input_rules_path_dir_failed: true
+              when: >-
+                "auditd_rules entry cannot set both path and dir" in
+                __invalid_input_failure_messages
 
         - name: Assert path and dir together failed validation
           ansible.builtin.assert:
@@ -471,6 +558,9 @@
             - name: Mark path with wrong filter rejected
               ansible.builtin.set_fact:
                 __invalid_input_rules_path_filter_failed: true
+              when: >-
+                "auditd_rules path and dir require filter type exit" in
+                __invalid_input_failure_messages
 
         - name: Assert path with non-exit filter failed validation
           ansible.builtin.assert:
@@ -478,7 +568,7 @@
               - __invalid_input_rules_path_filter_failed | default(false)
             fail_msg: tasks/assert_role_vars.yml should reject path unless filter is exit
 
-        - name: Assert rejects syscall when filter is not exit or io_uring
+        - name: Assert rejects syscall with unsupported filter
           block:
             - name: Run role with syscall and invalid filter
               ansible.builtin.include_role:
@@ -493,12 +583,19 @@
             - name: Mark syscall with wrong filter rejected
               ansible.builtin.set_fact:
                 __invalid_input_rules_sc_filter_failed: true
+              when: >-
+                (
+                  "auditd_rules syscall requires valid filter type exit, io_uring"
+                  if ansible_facts['os_family'] == 'RedHat'
+                  and ansible_facts['distribution_major_version'] is version('8', '>')
+                  else "auditd_rules syscall requires valid filter type exit"
+                ) in __invalid_input_failure_messages
 
-        - name: Assert syscall with non-exit and non-io_uring filter failed validation
+        - name: Assert syscall with unsupported filter failed validation
           ansible.builtin.assert:
             that:
               - __invalid_input_rules_sc_filter_failed | default(false)
-            fail_msg: tasks/assert_role_vars.yml should reject syscall unless filter is exit or io_uring
+            fail_msg: tasks/assert_role_vars.yml should reject syscall with an unsupported filter
 
         - name: Assert rejects auditd_rules field with invalid operator
           block:
@@ -516,6 +613,11 @@
             - name: Mark invalid field operator rejected
               ansible.builtin.set_fact:
                 __invalid_input_rules_field_op_failed: true
+              when: >-
+                "auditd_rules field must be nameOPvalue where OP is one of" in
+                __invalid_input_failure_messages and
+                "=, !=, <, >, <=, >=, &, &=" in
+                __invalid_input_failure_messages
 
         - name: Assert invalid field operator failed validation
           ansible.builtin.assert:
@@ -539,6 +641,9 @@
             - name: Mark overlong keyname rejected
               ansible.builtin.set_fact:
                 __invalid_input_rules_keyname_len_failed: true
+              when: >-
+                "auditd_rules keyname must be 31 characters or fewer (got length 32)" in
+                __invalid_input_failure_messages
 
         - name: Assert overlong keyname failed validation
           ansible.builtin.assert:
