@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: MIT
+---
+DOCUMENTATION:
+  name: auditd_non_empty_str_or_list
+  author: Linux System Roles
+  short_description: Check for a non-empty string or list of non-empty strings
+  description:
+    - Accepts a string containing non-whitespace characters.
+    - Also accepts a non-empty list or tuple whose elements are all such strings.
+    - Rejects empty lists and tuples, numbers, booleans, null values, and all other types.
+  options:
+    _input:
+      description: Value to check.
+      type: raw
+      required: true
+EXAMPLES: |
+  - name: Check an audit rule field
+    ansible.builtin.assert:
+      that:
+        - item.field is auditd_non_empty_str_or_list
+
+  # "uid=0" and ["uid=0", "auid>=1000"] pass.
+  # "  ", [], and ["uid=0", 0] fail.
+RETURN:
+  _value:
+    description: Whether the value is a non-empty string or a non-empty list or tuple of them.
+    type: boolean

@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: MIT
+---
+DOCUMENTATION:
+  name: auditd_scalar_or_mixed_list
+  author: Linux System Roles
+  short_description: Check for a number, non-empty string, or mixed list
+  description:
+    - Accepts a number other than a boolean, or a string containing non-whitespace characters.
+    - Also accepts a non-empty list or tuple whose elements are each an accepted number or string.
+    - Rejects empty lists and tuples, booleans, null values, and all other types.
+  options:
+    _input:
+      description: Value to check.
+      type: raw
+      required: true
+EXAMPLES: |
+  - name: Check a syscall value
+    ansible.builtin.assert:
+      that:
+        - item.syscall is auditd_scalar_or_mixed_list
+
+  # 42, "openat", and [42, "openat"] pass.
+  # true, "  ", [], and [42, true] fail.
+RETURN:
+  _value:
+    description: Whether the value is an accepted scalar or non-empty mixed list or tuple.
+    type: boolean
