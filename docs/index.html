@@ -246,6 +246,8 @@ id="toc-auditd_manage_rules">auditd_manage_rules</a></li>
 id="toc-auditd_purge_rules">auditd_purge_rules</a></li>
 <li><a href="#auditd_reboot_ok"
 id="toc-auditd_reboot_ok">auditd_reboot_ok</a></li>
+<li><a href="#auditd_transactional_update_reboot_ok"
+id="toc-auditd_transactional_update_reboot_ok">auditd_transactional_update_reboot_ok</a></li>
 <li><a href="#auditd_start_service"
 id="toc-auditd_start_service">auditd_start_service</a></li>
 <li><a href="#auditd_rules" id="toc-auditd_rules">auditd_rules</a>
@@ -627,6 +629,19 @@ enabling kernel auditing with <code>auditd_kernel_enable</code>, or when
 kernel still has loginuid immutability enabled (see
 <code>auditd_loginuid_immutable</code>). Use only when an immediate
 reboot is acceptable.</p>
+<h2
+id="auditd_transactional_update_reboot_ok">auditd_transactional_update_reboot_ok</h2>
+<p>Default: <code>null</code></p>
+<p>Type: bool</p>
+<p>This variable is used to handle reboots required by transactional
+updates. If a transactional update requires a reboot, the role will
+proceed with the reboot if
+<code>auditd_transactional_update_reboot_ok</code> is set to
+<code>true</code>. If set to <code>false</code>, the role will notify
+the user that a reboot is required, allowing for custom handling of the
+reboot requirement. If this variable is not set, the role will fail to
+ensure the reboot requirement is not overlooked. For non-transactional
+update systems, this variable is ignored.</p>
 <h2 id="auditd_start_service">auditd_start_service</h2>
 <p>Default: <code>true</code></p>
 <p>Type: bool</p>
