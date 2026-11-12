@@ -1,0 +1,115 @@
+# SPDX-License-Identifier: MIT
+---
+# If the new rules fail to load, the role must restore the old rules and fail.
+# The next run must fail again.
+- name: Test a failed rules load
+  hosts: all
+  vars:
+    __auditd_test_missing_dir: /etc/lsr_auditd_missing_dir
+    __auditd_test_rules_file: /etc/audit/rules.d/custom.rules
+    __auditd_test_good_rules:
+      - action: always
+        filter: exit
+        path: /etc/hosts
+        permission:
+          - write
+        keyname: lsr_auditd_load_good
+    __auditd_test_bad_rules:
+      - action: always
+        filter: exit
+        path: "{{ __auditd_test_missing_dir }}/file"
+        permission:
+          - write
+          - attribute_change
+        keyname: lsr_auditd_load_bad
+  tasks:
+    - name: Skip in containers, the rules cannot be loaded there
+      ansible.builtin.meta: end_host
+      when: ansible_connection | d("") in ["container", "docker", "community.docker.docker"]
+
+    - name: Run the test
+      block:
+        - name: Back up existing auditd configuration and rules
+          ansible.builtin.include_tasks: tasks/setup.yml
+
+        - name: Make sure the directory in the bad rule does not exist
+          ansible.builtin.file:
+            path: "{{ __auditd_test_missing_dir }}"
+            state: absent
+
+        - name: Run the role with good rules
+          ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+          vars:
+            __sr_public: true
+            auditd_manage_rules: true
+            auditd_rules: "{{ __auditd_test_good_rules }}"
+
+        - name: Get the checksum of the good rules
+          ansible.builtin.stat:
+            path: "{{ __auditd_test_rules_file }}"
+            checksum_algorithm: sha256
+          register: __auditd_test_good_stat
+
+        - name: Get the audit status
+          ansible.builtin.command: auditctl -s
+          register: __auditd_test_status
+          changed_when: false
+
+        - name: Check if the audit rules are locked (enabled 2) until reboot
+          ansible.builtin.set_fact:
+            __auditd_test_locked: "{{ 'enabled 2' in __auditd_test_status.stdout_lines }}"
+
+        - name: Skip the test if the rules are locked, they cannot be loaded until reboot
+          ansible.builtin.debug:
+            msg: The audit rules are locked (enabled 2). Skipping the failed load test.
+          when: __auditd_test_locked | bool
+
+        - name: Test the failed load
+          when: not __auditd_test_locked | bool
+          block:
+            - name: Run the role twice with a bad rule
+              ansible.builtin.include_tasks: tasks/rules_load_failure_run.yml
+              loop: [1, 2]
+              loop_control:
+                loop_var: __auditd_test_run
+
+            - name: Remove custom.rules
+              ansible.builtin.file:
+                path: "{{ __auditd_test_rules_file }}"
+                state: absent
+
+            - name: Load the rules without custom.rules
+              ansible.builtin.command: augenrules --load
+              changed_when: true
+
+            - name: Run the role with a bad rule and no old custom.rules
+              block:
+                - name: Run the role with the bad rule
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    auditd_manage_rules: true
+                    auditd_rules: "{{ __auditd_test_bad_rules }}"
+
+                - name: Record that the role did not fail
+                  ansible.builtin.set_fact:
+                    __auditd_test_no_file_failed: false
+              rescue:
+                - name: Record that the role failed
+                  ansible.builtin.set_fact:
+                    __auditd_test_no_file_failed: true
+
+            - name: Check custom.rules
+              ansible.builtin.stat:
+                path: "{{ __auditd_test_rules_file }}"
+              register: __auditd_test_no_file_stat
+
+            - name: Check that the role failed and removed the new custom.rules
+              ansible.builtin.assert:
+                that:
+                  - __auditd_test_no_file_failed
+                  - not __auditd_test_no_file_stat.stat.exists
+
+      always:
+        - name: Restore system state after test
+          ansible.builtin.include_tasks: tasks/cleanup.yml
+          tags: tests::cleanup

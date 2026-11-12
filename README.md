@@ -501,6 +501,9 @@ Type: bool
 If `true`, template `rules.d/custom.rules`. If `false`, the rules file is not
 managed.
 
+When the rules change, the role loads them right away. If the load fails, the
+role restores the old rules and fails.
+
 ### auditd_purge_rules
 
 Default: `false`
@@ -546,8 +549,7 @@ Default: `true`
 
 Type: bool
 
-If `true`, enable/start `auditd` and allow rule load handler behavior that
-requires a running audit stack.
+If `true`, enable/start `auditd` and load the rules when they change.
 
 ### auditd_rules
 

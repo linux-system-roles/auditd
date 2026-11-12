@@ -71,4 +71,4 @@
           (item.path | basename == 'custom.rules')
           and (__auditd_purge_keep_custom_rules | default(false) | bool)
         )
-      notify: Run augenrules
+      register: __auditd_purge_remove
