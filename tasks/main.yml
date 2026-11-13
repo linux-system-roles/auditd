@@ -90,21 +90,9 @@
     state: directory
     mode: "0750"
 
-- name: Purge rules.d when requested
-  ansible.builtin.include_tasks: purge_rules.yml
-  when:
-    - auditd_purge_rules | bool
-    - auditd_manage_rules | bool
-
-- name: Deploy custom audit rules
-  ansible.builtin.template:
-    src: custom.rules.j2
-    dest: "{{ __auditd_rules_file }}"
-    mode: "0664"
-  notify: Run augenrules
-  when:
-    - auditd_manage_rules | bool
-    - not (__auditd_purge_keep_custom_rules | default(false) | bool)
+- name: Manage audit rules
+  ansible.builtin.include_tasks: manage_rules.yml
+  when: auditd_manage_rules | bool
 
 - name: Handle loginuid immutable and optional reboot
   ansible.builtin.include_tasks: loginuid_immutable.yml
