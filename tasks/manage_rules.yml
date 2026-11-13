@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: MIT
 ---
+- name: Clear the failure message
+  ansible.builtin.set_fact:
+    __auditd_failure_message: ""
+
 # Load the rules right away. If fails, restore the old rules and fail.
 - name: Manage audit rules
   vars:
@@ -92,9 +96,13 @@
           changed_when: true
           failed_when: false
 
-        - name: Fail because the new rules did not load
-          ansible.builtin.fail:
-            msg: >-
+        # NOTE: Because of Ansible 2.9 support, we cannot re-raise with a different error message here
+        # because the `always` will "eat" the new message and restore the old message.  So for now,
+        # set the new error message here, and re-raise outside of the `always`
+        # see https://github.com/ansible/ansible/issues/43191
+        - name: Set the failure message
+          ansible.builtin.set_fact:
+            __auditd_failure_message: >-
               Failed to load the new audit rules.
               {{ 'The old rules were restored and loaded.' if __auditd_rules_restore_load.rc == 0
                  else 'The old rules were restored but failed to load: ' ~ __auditd_rules_restore_load.stderr }}
@@ -117,3 +125,8 @@
       when:
         - __auditd_rules_backup.path is defined
         - not __auditd_rules_restore_pending | bool
+
+- name: Raise the failure if set
+  ansible.builtin.fail:
+    msg: "{{ __auditd_failure_message }}"
+  when: __auditd_failure_message | length > 0
