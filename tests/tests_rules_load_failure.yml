@@ -23,10 +23,6 @@
           - attribute_change
         keyname: lsr_auditd_load_bad
   tasks:
-    - name: Skip in containers, the rules cannot be loaded there
-      ansible.builtin.meta: end_host
-      when: ansible_connection | d("") in ["container", "docker", "community.docker.docker"]
-
     - name: Run the test
       block:
         - name: Back up existing auditd configuration and rules
@@ -54,18 +50,21 @@
           ansible.builtin.command: auditctl -s
           register: __auditd_test_status
           changed_when: false
+          when: __auditd_is_booted | bool
 
-        - name: Check if the audit rules are locked (enabled 2) until reboot
+        - name: Check if the rules can be loaded (system booted and rules not locked)
           ansible.builtin.set_fact:
-            __auditd_test_locked: "{{ 'enabled 2' in __auditd_test_status.stdout_lines }}"
+            __auditd_test_skip: >-
+              {{ not __auditd_is_booted | bool
+                 or 'enabled 2' in __auditd_test_status.stdout_lines | d([]) }}
 
-        - name: Skip the test if the rules are locked, they cannot be loaded until reboot
+        - name: Skip the test if the rules cannot be loaded
           ansible.builtin.debug:
-            msg: The audit rules are locked (enabled 2). Skipping the failed load test.
-          when: __auditd_test_locked | bool
+            msg: The system is not booted or the audit rules are locked (enabled 2). Skipping the failed load test.
+          when: __auditd_test_skip | bool
 
         - name: Test the failed load
-          when: not __auditd_test_locked | bool
+          when: not __auditd_test_skip | bool
           block:
             - name: Run the role twice with a bad rule
               ansible.builtin.include_tasks: tasks/rules_load_failure_run.yml
@@ -97,6 +96,7 @@
                 - name: Record that the role failed
                   ansible.builtin.set_fact:
                     __auditd_test_no_file_failed: true
+                    __auditd_test_no_file_fail_msg: "{{ ansible_failed_result.msg | default('') }}"
 
             - name: Check custom.rules
               ansible.builtin.stat:
@@ -107,6 +107,7 @@
               ansible.builtin.assert:
                 that:
                   - __auditd_test_no_file_failed
+                  - "'Failed to load the new audit rules' in __auditd_test_no_file_fail_msg"
                   - not __auditd_test_no_file_stat.stat.exists
 
       always:

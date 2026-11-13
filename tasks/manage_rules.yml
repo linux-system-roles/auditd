@@ -4,10 +4,12 @@
 - name: Manage audit rules
   vars:
     __auditd_rules_dir: "{{ __auditd_rules_file | dirname }}"
-    __auditd_rules_load: >-
-      {{ auditd_start_service | bool
-         and ansible_connection | d('') not in ['container', 'docker', 'community.docker.docker'] }}
+    __auditd_rules_load: "{{ auditd_start_service | bool and __auditd_is_booted | bool }}"
   block:
+    - name: Clear the restore flag
+      ansible.builtin.set_fact:
+        __auditd_rules_restore_pending: false
+
     - name: Create a temporary directory for the rules backup
       ansible.builtin.tempfile:
         state: directory
@@ -48,6 +50,10 @@
           changed_when: true
 
       rescue:
+        - name: Set the restore flag
+          ansible.builtin.set_fact:
+            __auditd_rules_restore_pending: true
+
         - name: Save the load error
           ansible.builtin.set_fact:
             __auditd_rules_load_error: >-
@@ -75,6 +81,10 @@
             remote_src: true
             mode: preserve
 
+        - name: Clear the restore flag
+          ansible.builtin.set_fact:
+            __auditd_rules_restore_pending: false
+
         - name: Load the old rules
           ansible.builtin.command:
             argv: "{{ ['augenrules', '--load'] if __auditd_rules_load | bool else ['augenrules'] }}"
@@ -91,10 +101,19 @@
               Error: {{ __auditd_rules_load_error }}
 
   always:
+    - name: Show where the rules backup is kept
+      ansible.builtin.debug:
+        msg: "The old rules were not fully restored. The backup is kept in {{ __auditd_rules_backup.path }}"
+      when:
+        - __auditd_rules_backup.path is defined
+        - __auditd_rules_restore_pending | bool
+
     - name: Remove the rules backup
       ansible.builtin.file:
         path: "{{ __auditd_rules_backup.path }}"
         state: absent
       changed_when: false
       check_mode: false
-      when: __auditd_rules_backup.path is defined
+      when:
+        - __auditd_rules_backup.path is defined
+        - not __auditd_rules_restore_pending | bool
