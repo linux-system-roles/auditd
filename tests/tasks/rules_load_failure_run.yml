@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: MIT
+---
+# Run the role with a bad rule. Check that it failed and the old rules are back.
+# Used by tests_rules_load_failure.yml.
+- name: Run the role with the bad rule, run {{ __auditd_test_run }}
+  block:
+    - name: Run the role with the bad rule
+      ansible.builtin.include_tasks: run_role_with_clear_facts.yml
+      vars:
+        auditd_manage_rules: true
+        auditd_rules: "{{ __auditd_test_bad_rules }}"
+
+    - name: Record that the role did not fail
+      ansible.builtin.set_fact:
+        __auditd_test_failed: false
+  rescue:
+    - name: Record that the role failed
+      ansible.builtin.set_fact:
+        __auditd_test_failed: true
+        __auditd_test_fail_msg: "{{ ansible_failed_result.msg | default('') }}"
+
+- name: Get the checksum of custom.rules
+  ansible.builtin.stat:
+    path: "{{ __auditd_test_rules_file }}"
+    checksum_algorithm: sha256
+  register: __auditd_test_after_stat
+
+- name: List the loaded rules
+  ansible.builtin.command: auditctl -l
+  register: __auditd_test_loaded
+  changed_when: false
+
+- name: Check that the role failed and the old rules are back, run {{ __auditd_test_run }}
+  ansible.builtin.assert:
+    that:
+      - __auditd_test_failed
+      - "'old rules were restored' in __auditd_test_fail_msg"
+      - __auditd_test_after_stat.stat.checksum == __auditd_test_good_stat.stat.checksum
+      - "'lsr_auditd_load_good' in __auditd_test_loaded.stdout"
+      - "'lsr_auditd_load_bad' not in __auditd_test_loaded.stdout"

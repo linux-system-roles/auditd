@@ -1,0 +1,132 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Clear the failure message
+  ansible.builtin.set_fact:
+    __auditd_failure_message: ""
+
+# Load the rules right away. If fails, restore the old rules and fail.
+- name: Manage audit rules
+  vars:
+    __auditd_rules_dir: "{{ __auditd_rules_file | dirname }}"
+    __auditd_rules_load: "{{ auditd_start_service | bool and __auditd_is_booted | bool }}"
+  block:
+    - name: Clear the restore flag
+      ansible.builtin.set_fact:
+        __auditd_rules_restore_pending: false
+
+    - name: Create a temporary directory for the rules backup
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: lsr_auditd_rules_
+      register: __auditd_rules_backup
+      changed_when: false
+      check_mode: false
+
+    - name: Back up the rules
+      ansible.builtin.copy:
+        src: "{{ __auditd_rules_dir }}/"
+        dest: "{{ __auditd_rules_backup.path }}/"
+        remote_src: true
+        mode: preserve
+      changed_when: false
+      check_mode: false
+
+    - name: Purge rules.d when requested
+      ansible.builtin.include_tasks: purge_rules.yml
+      when: auditd_purge_rules | bool
+
+    - name: Deploy custom audit rules
+      ansible.builtin.template:
+        src: custom.rules.j2
+        dest: "{{ __auditd_rules_file }}"
+        mode: "0664"
+      register: __auditd_rules_deploy
+      when: not (__auditd_purge_keep_custom_rules | default(false) | bool)
+
+    - name: Load the new rules or restore the old rules
+      when: >-
+        __auditd_rules_deploy is changed
+        or (auditd_purge_rules | bool and __auditd_purge_remove is changed)
+      block:
+        - name: Load the new rules
+          ansible.builtin.command:
+            argv: "{{ ['augenrules', '--load'] if __auditd_rules_load | bool else ['augenrules'] }}"
+          changed_when: true
+
+      rescue:
+        - name: Set the restore flag
+          ansible.builtin.set_fact:
+            __auditd_rules_restore_pending: true
+
+        - name: Save the load error
+          ansible.builtin.set_fact:
+            __auditd_rules_load_error: >-
+              {{ ansible_failed_result.stderr | default('', true) or ansible_failed_result.msg | default('') }}
+
+        - name: Find the new rules
+          ansible.builtin.find:
+            paths: "{{ __auditd_rules_dir }}"
+            file_type: any
+            hidden: true
+          register: __auditd_rules_new
+
+        - name: Remove the new rules
+          ansible.builtin.file:
+            path: "{{ item.path }}"
+            state: absent
+          loop: "{{ __auditd_rules_new.files }}"
+          loop_control:
+            label: "{{ item.path }}"
+
+        - name: Restore the old rules
+          ansible.builtin.copy:
+            src: "{{ __auditd_rules_backup.path }}/"
+            dest: "{{ __auditd_rules_dir }}/"
+            remote_src: true
+            mode: preserve
+
+        - name: Clear the restore flag
+          ansible.builtin.set_fact:
+            __auditd_rules_restore_pending: false
+
+        - name: Load the old rules
+          ansible.builtin.command:
+            argv: "{{ ['augenrules', '--load'] if __auditd_rules_load | bool else ['augenrules'] }}"
+          register: __auditd_rules_restore_load
+          changed_when: true
+          failed_when: false
+
+        # NOTE: Because of Ansible 2.9 support, we cannot re-raise with a different error message here
+        # because the `always` will "eat" the new message and restore the old message.  So for now,
+        # set the new error message here, and re-raise outside of the `always`
+        # see https://github.com/ansible/ansible/issues/43191
+        - name: Set the failure message
+          ansible.builtin.set_fact:
+            __auditd_failure_message: >-
+              Failed to load the new audit rules.
+              {{ 'The old rules were restored and loaded.' if __auditd_rules_restore_load.rc == 0
+                 else 'The old rules were restored but failed to load: ' ~ __auditd_rules_restore_load.stderr }}
+              Error: {{ __auditd_rules_load_error }}
+
+  always:
+    - name: Show where the rules backup is kept
+      ansible.builtin.debug:
+        msg: "The old rules were not fully restored. The backup is kept in {{ __auditd_rules_backup.path }}"
+      when:
+        - __auditd_rules_backup.path is defined
+        - __auditd_rules_restore_pending | bool
+
+    - name: Remove the rules backup
+      ansible.builtin.file:
+        path: "{{ __auditd_rules_backup.path }}"
+        state: absent
+      changed_when: false
+      check_mode: false
+      when:
+        - __auditd_rules_backup.path is defined
+        - not __auditd_rules_restore_pending | bool
+
+- name: Raise the failure if set
+  ansible.builtin.fail:
+    msg: "{{ __auditd_failure_message }}"
+  when: __auditd_failure_message | length > 0
