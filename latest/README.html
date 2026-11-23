@@ -607,6 +607,19 @@ continues.</p>
 <p>Type: bool</p>
 <p>If <code>true</code>, template <code>rules.d/custom.rules</code>. If
 <code>false</code>, the rules file is not managed.</p>
+<p>When the rules change and
+<code>auditd_start_service</code>=<code>true</code> and the system is
+booted, the role loads them right away. Otherwise it only writes the
+rules file. If the load fails, the role restores the old rules and
+fails.</p>
+<p>To recover from a failed load:</p>
+<ol type="1">
+<li>Read the load error in the role output.</li>
+<li>Check the rules that are loaded now with
+<code>auditctl -l</code>.</li>
+<li>Fix the rule in <code>auditd_rules</code> and run the role
+again.</li>
+</ol>
 <h2 id="auditd_purge_rules">auditd_purge_rules</h2>
 <p>Default: <code>false</code></p>
 <p>Type: bool</p>
@@ -645,8 +658,8 @@ update systems, this variable is ignored.</p>
 <h2 id="auditd_start_service">auditd_start_service</h2>
 <p>Default: <code>true</code></p>
 <p>Type: bool</p>
-<p>If <code>true</code>, enable/start <code>auditd</code> and allow rule
-load handler behavior that requires a running audit stack.</p>
+<p>If <code>true</code>, enable/start <code>auditd</code> and load the
+rules when they change.</p>
 <h2 id="auditd_rules">auditd_rules</h2>
 <p>Default: <code>[]</code></p>
 <p>Type: list (elements: dict)</p>
