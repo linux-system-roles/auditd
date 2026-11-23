@@ -1,6 +1,42 @@
 Changelog
 =========
 
+[1.2.0] - 2026-11-23
+--------------------
+
+### New Features
+
+- feat: add kernel audit enablement and checking (#68)
+- feat: Add SLE16 support (#77)
+- feat: Handle reboot for transactional update systems (#84)
+
+### Bug Fixes
+
+- fix: load audit rules right away and restore them if the load fails (#91)
+
+### Other Changes
+
+- ci: no CI test by default - implement slash commands for CI tests [citest_skip] (#70)
+- ci: ansible-test-milestone is now version 2.23 - update sanity ignore files (#71)
+- ci: allow lsr org members to run ci tests (#72)
+- ci: Run Dependabot monthly and group changes in a single PR (#75)
+- ci: bump tox-lsr version 3.21.0, myrotvorets/set-commit-status-action, support leap-16.0 (#76)
+- refactor: role depends on fedora.linux_system_roles (#78)
+- test: check invalid inputs for correct error message (#79)
+- ci: use shared actions and lock workflow dependencies (#80)
+- ci: use shared actions and lock workflow dependencies (#81)
+- ci: Use order 10 for centos vault task so that it runs first (#82)
+- docs: document auditd test plugins (#83)
+- docs: add AI policy; update setup-python, codeql actions (#85)
+- ci: retry centos vault repo failures using new package_retry yum/dnf plugin (#86)
+- docs: tag markdown plain text blocks correctly (#87)
+- ci: Use a fixed 5 minute backoff for CentOS vault repos (#88)
+- ci: support Fedora 45, Ansible 2.22; drop Fedora 43 (#89)
+- ci: use ubuntu 24.04 for test envs that use py39 (#90)
+- ci: use ubuntu 26.04 with podman 5.x and disable apparmor restriction (#92)
+- docs: remove extra blank lines from .coderabbit.yaml (#93)
+- ci: update tox-lsr for support for tests/module_utils (#94)
+
 [1.1.1] - 2026-09-17
 --------------------
 
